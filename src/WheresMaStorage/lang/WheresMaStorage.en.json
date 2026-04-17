@@ -1,5 +1,6 @@
 {
   "DebugWarning": "Please note you have debug mode turned on. It isn't recommended to leave this on unless you have a purpose for it.",
+  "MisWarning": "More Inventory Slots is installed alongside Where's Ma Storage. Both mods change inventory sizes and will conflict — you may see stockpile piles disappear when filled past their normal limit. Please remove More Inventory Slots. Where's Ma Storage already provides larger inventories for your player and chests through its own settings. More Inventory Slots has been disabled for this session.",
   "Player": "Player",
   "Wilderness": "Wilderness",
   "ShrinkConfirmPlayer": "Reducing the inventory size will drop {0} item(s) from your inventory on the ground next to you.\n\nContinue?",

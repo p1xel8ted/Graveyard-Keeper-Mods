@@ -3,7 +3,9 @@
 ## 2.1.14 | 17 April 2026
 
 - Fixed Chinese translations not loading
+- If "More Inventory Slots" is installed alongside Where's Ma Storage, its inventory-size overrides are now automatically disabled at the main menu. Both mods change inventory sizes in incompatible ways and together caused stockpile piles to disappear once filled past the usual limit, and merchant trade tabs to show up empty. You'll still see the translated one-time warning explaining what happened and recommending you uninstall More Inventory Slots permanently.
 - Added an update notice on the main menu that flags when this mod (or others in this collection) has a newer version on Nexus. Click an entry to open its Nexus page. Toggle off in settings if you'd rather not see it
+
 ### Inventory size
 
 - The single Additional Inventory Space slider has been split into two — one for your player inventory and one for chests, racks, and other containers. Want a tight player carry but huge chests? Now you can. Your existing slider value is migrated to both sliders on first launch

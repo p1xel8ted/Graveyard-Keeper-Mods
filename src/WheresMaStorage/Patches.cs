@@ -6,12 +6,124 @@ namespace WheresMaStorage;
 [HarmonyPriority(0)]
 public static class Patches
 {
+    private static bool IsVendorLike(WorldGameObject wgo)
+    {
+        return wgo != null &&
+               (wgo.vendor != null || wgo.obj_id.IndexOf("barman", StringComparison.OrdinalIgnoreCase) >= 0);
+    }
+
+    private static WorldGameObject GetActiveVendorInteraction()
+    {
+        return IsVendorLike(Fields.CurrentWgoInteraction) ? Fields.CurrentWgoInteraction : null;
+    }
+
+    private static WmsPanelKind ClassifyPanelKind(InventoryPanelGUI panel, WorldGameObject activeInteraction = null)
+    {
+        if (panel == null) return WmsPanelKind.Unknown;
+
+        var panelNameLower = panel.name.ToLowerInvariant();
+        var looksVendor = panelNameLower.Contains(Fields.Vendor);
+        var looksChest = panelNameLower.Contains(Fields.Chest);
+        var looksPlayer = panelNameLower.Contains(Fields.Player) ||
+                          panelNameLower.Contains(Fields.Multi) && !looksChest && !looksVendor;
+
+        if (looksPlayer) return WmsPanelKind.Player;
+        if (IsVendorLike(activeInteraction) && !looksPlayer) return WmsPanelKind.Vendor;
+        if (looksVendor) return WmsPanelKind.Vendor;
+        if (looksChest) return WmsPanelKind.Chest;
+        if (panelNameLower.Contains("resource")) return WmsPanelKind.Resource;
+        return WmsPanelKind.Unknown;
+    }
+
+    private static WmsPanelKind SetPanelKind(InventoryPanelGUI panel, WorldGameObject activeInteraction = null)
+    {
+        if (panel == null) return WmsPanelKind.Unknown;
+
+        var interaction = activeInteraction ?? Fields.CurrentWgoInteraction;
+        var marker = panel.GetComponent<WmsPanelMarker>() ?? panel.gameObject.AddComponent<WmsPanelMarker>();
+        marker.Kind = ClassifyPanelKind(panel, interaction);
+        marker.InteractionObjId = interaction?.obj_id ?? string.Empty;
+        return marker.Kind;
+    }
+
+    private static WmsPanelKind GetPanelKind(InventoryPanelGUI panel)
+    {
+        if (panel == null) return WmsPanelKind.Unknown;
+        return panel.TryGetComponent<WmsPanelMarker>(out var marker)
+            ? marker.Kind
+            : SetPanelKind(panel, Fields.CurrentWgoInteraction);
+    }
+
+    private static bool IsVendorUiPanel(InventoryPanelGUI panel)
+    {
+        return GetPanelKind(panel) == WmsPanelKind.Vendor;
+    }
+
+    private static bool IsPlayerUiPanel(InventoryPanelGUI panel)
+    {
+        return GetPanelKind(panel) == WmsPanelKind.Player;
+    }
+
+    private static bool IsResourceLikePanel(WmsPanelKind panelKind)
+    {
+        return panelKind is WmsPanelKind.Resource or WmsPanelKind.Unknown;
+    }
+
+    private static bool ShouldSkipVendorInventorySource(WorldGameObject wgo)
+    {
+        if (wgo == null) return false;
+        return IsVendorLike(wgo);
+    }
+
+    private static bool ShouldSkipVendorUiProcessing(InventoryPanelGUI panel = null)
+    {
+        return IsVendorUiPanel(panel);
+    }
+
+    private static bool ShouldForcePersonalOnly(InventoryPanelGUI panel = null)
+    {
+        return Plugin.ShowOnlyPersonalInventory.Value ||
+               GetActiveVendorInteraction() != null && IsPlayerUiPanel(panel) ||
+               Fields.IsTavernCellarRack ||
+               Fields.IsSoulBox ||
+               Fields.IsChest ||
+               Fields.IsWritersTable;
+    }
+
     // Replaces Actions.GameStartedPlaying += Helpers.RunWmsTasks
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameSave), nameof(GameSave.GlobalEventsCheck))]
     public static void GameSave_GlobalEventsCheck()
     {
         Helpers.RunWmsTasks();
+    }
+
+    // If MoreInventorySlots is also loaded, unpatch its Harmony patches and show a one-shot
+    // translated popup on the main menu. MIS globally overrides Inventory.size with a prefix
+    // returning false, which fights every mod that reasons about per-container sizes (WMS
+    // among them) and causes visual glitches on stockpiles and vendor trade tabs.
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(MainMenuGUI), nameof(MainMenuGUI.Open), typeof(bool))]
+    public static void MainMenuGUI_Open_Postfix()
+    {
+        if (Fields.MisWarningShown) return;
+        if (!Chainloader.PluginInfos.ContainsKey(Fields.MoreInventorySlotsGuid)) return;
+        Fields.MisWarningShown = true;
+
+        try
+        {
+            Harmony.UnpatchID(Fields.MoreInventorySlotsGuid);
+            Plugin.Log.LogWarning("[MIS] Detected MoreInventorySlots; unpatched its Harmony patches to prevent inventory-size conflicts.");
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogWarning($"[MIS] Failed to unpatch MoreInventorySlots: {ex.Message}");
+        }
+
+        if (GUIElements.me?.dialog != null)
+        {
+            GUIElements.me.dialog.OpenOK("Where's Ma Storage!", null, Lang.Get("MisWarning"), true, string.Empty);
+        }
     }
 
     // Replaces Actions.GameBalanceLoad += Helpers.GameBalanceLoad
@@ -38,6 +150,11 @@ public static class Patches
         Fields.IsWritersTable = __instance.obj_id.ToLowerInvariant().Contains("writer");
         Fields.IsSoulBox = __instance.obj_id.ToLowerInvariant().Contains("soul_container");
         Fields.IsChurchPulpit = __instance.obj_id.ToLowerInvariant().Contains("pulpit");
+
+        if (Plugin.DebugEnabled && (Fields.IsVendor || Fields.IsBarman))
+        {
+            Helpers.LogVendorInventorySnapshot("interact", __instance);
+        }
 
         if (Plugin.DebugEnabled)
         {
@@ -147,6 +264,13 @@ public static class Patches
         var objId = __instance.obj_id;
         var objDefId = __instance.obj_def.id;
         var worldZoneId = __instance.GetMyWorldZoneId();
+
+        if (ShouldSkipVendorInventorySource(__instance))
+        {
+            if (Plugin.DebugEnabled) Helpers.Log($"[GetMultiInventory] skip (vendor/barman interaction) obj={objId} zone={worldZoneId} current={Fields.CurrentWgoInteraction?.obj_id}");
+            return true;
+        }
+
         var isQuarry = worldZoneId.Contains("stone_workyard") || worldZoneId.Contains("marble_deposit");
         var isWell = objId.Contains("well");
         var isZombieMill = worldZoneId.Contains("zombie_mill");
@@ -357,6 +481,29 @@ public static class Patches
     public static void InventoryPanelGUI_DoOpening_Prefix(InventoryPanelGUI __instance,
         ref MultiInventory multi_inventory)
     {
+        var activeVendorInteraction = GetActiveVendorInteraction();
+        var panelKind = SetPanelKind(__instance, activeVendorInteraction);
+        var isVendorPanel = panelKind == WmsPanelKind.Vendor;
+        var isPlayerPanel = panelKind == WmsPanelKind.Player;
+
+        if (Plugin.DebugEnabled && activeVendorInteraction != null && isVendorPanel)
+        {
+            Helpers.LogVendorPanelSnapshot("do-opening/raw", __instance, panelKind, multi_inventory,
+                activeVendorInteraction);
+        }
+
+        if (Plugin.DebugEnabled && panelKind == WmsPanelKind.Unknown)
+        {
+            Helpers.LogPanelClassificationSnapshot("do-opening/classify", __instance, panelKind, multi_inventory,
+                Fields.CurrentWgoInteraction);
+        }
+
+        if (ShouldSkipVendorUiProcessing(__instance))
+        {
+            if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Prefix] skip (vendor/barman interaction) panel={__instance.name}");
+            return;
+        }
+
         if (GUIElements.me.pray_craft.gameObject.activeSelf ||
             GUIElements.me.pray_craft.gameObject.activeInHierarchy)
         {
@@ -364,13 +511,13 @@ public static class Patches
             return;
         }
 
-        if (__instance.GetComponentInParent<VendorGUI>() != null)
+        if (isVendorPanel)
         {
-            if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Prefix] skip (VendorGUI parent detected) panel={__instance.name}");
+            if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Prefix] skip (vendor panel detected) panel={__instance.name}");
             return;
         }
 
-        if (__instance.name.ToLowerInvariant().Contains(Fields.Vendor))
+        if (__instance.name.IndexOf(Fields.Vendor, StringComparison.OrdinalIgnoreCase) >= 0)
         {
             if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Prefix] skip (panel name contains 'vendor') panel={__instance.name}");
             return;
@@ -399,9 +546,9 @@ public static class Patches
 
         __instance.dont_show_empty_rows = Plugin.DontShowEmptyRowsInInventory.Value;
 
-        if (Fields.IsCraft || Fields.IsVendor || Fields.IsChurchPulpit)
+        if (Fields.IsCraft || Fields.IsChurchPulpit)
         {
-            if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Prefix] skip (flag match Craft={Fields.IsCraft}/Vendor={Fields.IsVendor}/Pulpit={Fields.IsChurchPulpit}) panel={__instance.name}");
+            if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Prefix] skip (flag match Craft={Fields.IsCraft}/Pulpit={Fields.IsChurchPulpit}) panel={__instance.name}");
             return;
         }
 
@@ -411,13 +558,14 @@ public static class Patches
             return;
         }
 
-        if (Plugin.ShowOnlyPersonalInventory.Value ||
-            Fields.IsBarman ||
-            Fields.IsTavernCellarRack ||
-            Fields.IsSoulBox ||
-            Fields.IsChest ||
-            Fields.IsWritersTable)
+        if (ShouldForcePersonalOnly(__instance))
         {
+            if (!isPlayerPanel)
+            {
+                if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Prefix] skip (own-inventory filter only applies to player panel) panel={__instance.name}");
+                return;
+            }
+
             if (__instance.name.Contains("bag"))
             {
                 if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Prefix] skip (bag panel) panel={__instance.name}");
@@ -436,7 +584,7 @@ public static class Patches
                     onlyMineInventory.AddInventory(multi_inventory.all[i + 1]);
                 }
             }
-            if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Prefix] replaced multi (ShowOnly={Plugin.ShowOnlyPersonalInventory.Value},Barman={Fields.IsBarman},TavernCellar={Fields.IsTavernCellarRack},SoulBox={Fields.IsSoulBox},Chest={Fields.IsChest},Writer={Fields.IsWritersTable}) panel={__instance.name} ({multi_inventory.all.Count} → {onlyMineInventory.all.Count} inventories, {bagCount} bags)");
+            if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Prefix] replaced multi (ShowOnly={Plugin.ShowOnlyPersonalInventory.Value},VendorLike={GetActiveVendorInteraction() != null},Barman={Fields.IsBarman},TavernCellar={Fields.IsTavernCellarRack},SoulBox={Fields.IsSoulBox},Chest={Fields.IsChest},Writer={Fields.IsWritersTable}) panel={__instance.name} ({multi_inventory.all.Count} → {onlyMineInventory.all.Count} inventories, {bagCount} bags)");
             multi_inventory = onlyMineInventory;
         }
     }
@@ -445,16 +593,19 @@ public static class Patches
     [HarmonyPatch(typeof(InventoryPanelGUI), nameof(InventoryPanelGUI.DoOpening))]
     public static void InventoryPanelGUI_DoOpening_Postfix(InventoryPanelGUI __instance)
     {
-        var panelNameLower = __instance.name.ToLowerInvariant();
-        var isChestPanel = panelNameLower.Contains(Fields.Chest);
-        var isVendorPanel = panelNameLower.Contains(Fields.Vendor) ||
-                            __instance.GetComponentInParent<VendorGUI>() != null;
-        var isPlayerPanel = panelNameLower.Contains(Fields.Player) ||
-                            panelNameLower.Contains(Fields.Multi) && Fields.CurrentWgoInteraction == null;
+        if (ShouldSkipVendorUiProcessing(__instance))
+        {
+            if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Postfix] skip (vendor/barman interaction) panel={__instance.name}");
+            return;
+        }
 
-        var isResourcePanelProbably = !isChestPanel && !isVendorPanel && !isPlayerPanel;
+        var panelKind = GetPanelKind(__instance);
+        var isChestPanel = panelKind == WmsPanelKind.Chest;
+        var isVendorPanel = panelKind == WmsPanelKind.Vendor;
+        var isPlayerPanel = panelKind == WmsPanelKind.Player;
+        var isResourcePanelProbably = IsResourceLikePanel(panelKind);
 
-        if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Postfix] panel={__instance.name} classified: chest={isChestPanel} vendor={isVendorPanel} player={isPlayerPanel} resource={isResourcePanelProbably}");
+        if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Postfix] panel={__instance.name} kind={panelKind.ToString().ToLowerInvariant()}");
 
         foreach (var a in __instance._separators)
         {
@@ -562,10 +713,11 @@ public static class Patches
     [HarmonyPatch(typeof(InventoryPanelGUI), nameof(InventoryPanelGUI.Redraw))]
     public static void InventoryPanelGUI_Redraw(InventoryPanelGUI __instance)
     {
-        var panelNameLower = __instance.name.ToLowerInvariant();
-        var isChest = panelNameLower.Contains(Fields.Chest);
-        var isPlayer = panelNameLower.Contains(Fields.Player) ||
-                       panelNameLower.Contains(Fields.Multi) && Fields.CurrentWgoInteraction == null;
+        if (ShouldSkipVendorUiProcessing(__instance)) return;
+
+        var panelKind = GetPanelKind(__instance);
+        var isChest = panelKind == WmsPanelKind.Chest;
+        var isPlayer = panelKind == WmsPanelKind.Player;
 
         if ((isPlayer || isChest) && Plugin.ShowUsedSpaceInTitles.Value)
         {
@@ -589,9 +741,8 @@ public static class Patches
     public static void InventoryWidget_FilterItems(InventoryWidget __instance,
         InventoryWidget.ItemFilterDelegate filter_delegate)
     {
-        if (__instance.gameObject.transform.parent.transform.parent.transform.parent.name.ToLowerInvariant()
-            .Contains(Fields.Vendor))
-            return;
+        var parentPanel = __instance.GetComponentInParent<InventoryPanelGUI>();
+        if (ShouldSkipVendorUiProcessing(parentPanel)) return;
 
         if (!Plugin.HideInvalidSelections.Value) return;
 
@@ -687,13 +838,5 @@ public static class Patches
         }
 
         Helpers.OriginalInventorySizes.TryAdd(__instance.obj_def.id, __instance.data.inventory_size);
-
-        if (!Plugin.ModifyInventorySize.Value) return;
-        if (!string.Equals(__instance.obj_id, Fields.NpcBarman)) return;
-        if (!Helpers.OriginalInventorySizes.TryGetValue(__instance.obj_def.id, out var originalSize)) return;
-
-        var requested = originalSize + Plugin.AdditionalContainerInventorySpace.Value;
-        var clamped = Math.Max(requested, __instance.data.inventory.Count);
-        __instance.data.SetInventorySize(clamped);
     }
 }

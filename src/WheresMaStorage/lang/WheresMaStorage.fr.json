@@ -1,5 +1,6 @@
 {
   "DebugWarning": "Veuillez noter que le mode débogage est activé. Il n'est pas recommandé de le laisser activé sauf si vous en avez besoin.",
+  "MisWarning": "More Inventory Slots est installé en même temps que Where's Ma Storage. Les deux mods modifient la taille des inventaires et entrent en conflit — les tas de stockage peuvent disparaître lorsqu'ils dépassent leur limite habituelle. Veuillez désinstaller More Inventory Slots. Where's Ma Storage fournit déjà des inventaires plus grands pour le joueur et les coffres via ses propres options. More Inventory Slots a été désactivé pour cette session.",
   "Player": "Joueur",
   "Wilderness": "Région sauvage",
   "ShrinkConfirmPlayer": "Réduire la taille de l'inventaire fera tomber {0} objet(s) de votre inventaire sur le sol à côté de vous.\n\nContinuer ?",

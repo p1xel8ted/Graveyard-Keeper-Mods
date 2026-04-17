@@ -11,6 +11,7 @@ global using System.Reflection;
 global using System.Reflection.Emit;
 global using System.Text;
 global using BepInEx;
+global using BepInEx.Bootstrap;
 global using BepInEx.Configuration;
 global using BepInEx.Logging;
 global using Shared;

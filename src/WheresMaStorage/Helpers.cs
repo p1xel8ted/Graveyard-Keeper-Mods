@@ -574,6 +574,108 @@ public static class Helpers
         }
     }
 
+    internal static void LogVendorInventorySnapshot(string stage, WorldGameObject wgo)
+    {
+        if (!Plugin.DebugEnabled || wgo == null) return;
+
+        Log($"[VendorDebug] {stage} start obj={wgo.obj_id} zone={wgo.GetMyWorldZoneId()} vendor={(wgo.vendor != null)}");
+        LogInventoryItems("[VendorDebug] wgo.data.inventory", wgo.data?.inventory, wgo.data?.inventory_size);
+        LogInventoryItems("[VendorDebug] wgo.data.secondary_inventory", wgo.data?.secondary_inventory, null);
+
+        if (wgo.vendor != null)
+        {
+            Log($"[VendorDebug] vendor.state: money={wgo.vendor.cur_money:0.##}, tier={wgo.vendor.cur_tier}, max_tier={wgo.vendor.max_tier}");
+            LogMultiInventoryItems("[VendorDebug] vendor.inventory", wgo.vendor.inventory);
+            LogMultiInventoryItems("[VendorDebug] vendor.drawing_inventory", wgo.vendor.drawing_inventory);
+            LogInventoryItems("[VendorDebug] vendor.cur_offer", wgo.vendor.cur_offer?.inventory, wgo.vendor.cur_offer?.inventory_size);
+        }
+
+        Log($"[VendorDebug] {stage} end obj={wgo.obj_id}");
+    }
+
+    internal static void LogVendorPanelSnapshot(string stage, InventoryPanelGUI panel, WmsPanelKind panelKind,
+        MultiInventory multiInventory, WorldGameObject wgo)
+    {
+        if (!Plugin.DebugEnabled || panel == null || multiInventory == null) return;
+
+        Log($"[VendorDebug] {stage} panel={panel.name} kind={panelKind.ToString().ToLowerInvariant()} obj={wgo?.obj_id ?? "<null>"}");
+        LogMultiInventoryItems("[VendorDebug] panel.multi_inventory", multiInventory);
+    }
+
+    internal static void LogPanelClassificationSnapshot(string stage, InventoryPanelGUI panel, WmsPanelKind panelKind,
+        MultiInventory multiInventory, WorldGameObject wgo)
+    {
+        if (!Plugin.DebugEnabled || panel == null) return;
+
+        Log($"[PanelDebug] {stage} panel={panel.name} kind={panelKind.ToString().ToLowerInvariant()} interaction={wgo?.obj_id ?? "<none>"} zone={wgo?.GetMyWorldZoneId() ?? "<none>"}");
+        LogMultiInventorySummary("[PanelDebug] panel.multi_inventory", multiInventory);
+    }
+
+    private static void LogMultiInventoryItems(string label, MultiInventory multiInventory)
+    {
+        if (multiInventory == null)
+        {
+            Log($"{label}: <null>");
+            return;
+        }
+
+        var inventories = multiInventory.all ?? [];
+        Log($"{label}: MultiInventory count={inventories.Count}");
+        for (var i = 0; i < inventories.Count; i++)
+        {
+            LogInventoryItems($"{label}[{i}]", inventories[i]?.data?.inventory, inventories[i]?.data?.inventory_size);
+        }
+    }
+
+    private static void LogMultiInventorySummary(string label, MultiInventory multiInventory)
+    {
+        if (multiInventory == null)
+        {
+            Log($"{label}: <null>");
+            return;
+        }
+
+        var inventories = multiInventory.all ?? [];
+        Log($"{label}: count={inventories.Count}");
+        for (var i = 0; i < inventories.Count; i++)
+        {
+            var inventory = inventories[i];
+            var data = inventory?.data;
+            var id = string.IsNullOrEmpty(data?.id) ? "<none>" : data.id;
+            var name = string.IsNullOrEmpty(inventory?.name) ? "<none>" : inventory.name;
+            var preset = string.IsNullOrEmpty(inventory?.preset) ? "<none>" : inventory.preset;
+            var count = data?.inventory?.Count ?? 0;
+            var size = data?.inventory_size ?? 0;
+            Log($"{label}[{i}]: id={id} name={name} preset={preset} items={count} size={size}");
+        }
+    }
+
+    private static void LogInventoryItems(string label, IEnumerable<Item> items, int? inventorySize)
+    {
+        var itemList = items?.ToList() ?? [];
+        var sizeText = inventorySize.HasValue ? $", size={inventorySize.Value}" : string.Empty;
+
+        if (itemList.Count == 0)
+        {
+            Log($"{label}: <empty>{sizeText}");
+            return;
+        }
+
+        var preview = string.Join(", ", itemList.Select((item, index) => FormatInventoryItem(index, item)));
+        Log($"{label}: count={itemList.Count}{sizeText} [{preview}]");
+    }
+
+    private static string FormatInventoryItem(int index, Item item)
+    {
+        if (item == null) return $"#{index}:<null>";
+
+        var id = string.IsNullOrEmpty(item.id) ? item.definition?.id ?? "<no-id>" : item.id;
+        var quantity = item.value;
+        var itemType = item.definition?.type.ToString() ?? "unknown";
+        var bagSuffix = item.is_bag ? ",bag" : string.Empty;
+        return $"#{index}:{id} x{quantity} ({itemType}{bagSuffix})";
+    }
+
     internal static bool TryAdd<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, TValue value)
     {
         if (dictionary.ContainsKey(key)) return false;

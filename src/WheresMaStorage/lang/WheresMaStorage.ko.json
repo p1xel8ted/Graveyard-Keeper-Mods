@@ -1,5 +1,6 @@
 {
   "DebugWarning": "디버그 모드가 켜져 있습니다. 특별한 목적이 없다면 켜 두지 않는 것을 권장합니다.",
+  "MisWarning": "More Inventory Slots가 Where's Ma Storage와 함께 설치되어 있습니다. 두 모드 모두 인벤토리 크기를 변경하므로 충돌이 발생합니다 — 일반 한계를 넘기면 비축물 더미가 사라질 수 있습니다. More Inventory Slots를 제거해 주세요. Where's Ma Storage는 자체 설정을 통해 이미 플레이어와 상자에 더 큰 인벤토리를 제공합니다. 이번 세션 동안 More Inventory Slots는 비활성화되었습니다.",
   "Player": "플레이어",
   "Wilderness": "황야",
   "ShrinkConfirmPlayer": "인벤토리 크기를 줄이면 인벤토리에서 {0}개의 아이템이 발 옆 바닥에 떨어집니다.\n\n계속하시겠습니까?",

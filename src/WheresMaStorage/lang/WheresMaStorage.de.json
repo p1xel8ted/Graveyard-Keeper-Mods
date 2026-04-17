@@ -1,5 +1,6 @@
 {
   "DebugWarning": "Bitte beachten Sie, dass der Debug-Modus aktiviert ist. Es wird nicht empfohlen, diesen eingeschaltet zu lassen, es sei denn, Sie haben einen Zweck dafür.",
+  "MisWarning": "More Inventory Slots ist zusammen mit Where's Ma Storage installiert. Beide Mods verändern die Inventargröße und geraten in Konflikt — Lagerstapel können unsichtbar werden, wenn sie das normale Limit überschreiten. Bitte entferne More Inventory Slots. Where's Ma Storage bietet über seine eigenen Einstellungen bereits größere Inventare für Spieler und Truhen. More Inventory Slots wurde für diese Sitzung deaktiviert.",
   "Player": "Spieler",
   "Wilderness": "Wildnis",
   "ShrinkConfirmPlayer": "Wenn die Inventargröße verkleinert wird, fallen {0} Gegenstände aus deinem Inventar auf den Boden neben dir.\n\nFortfahren?",

@@ -1,5 +1,6 @@
 {
   "DebugWarning": "请注意，调试模式已开启。除非有特定目的，否则不建议保持开启状态。",
+  "MisWarning": "你同时安装了 More Inventory Slots 和 Where's Ma Storage。这两个 Mod 都会修改物品栏容量，会相互冲突——超过原本上限后，储物堆的模型可能会消失。请卸载 More Inventory Slots。Where's Ma Storage 的自身设置已经可以为玩家和箱子提供更大的物品栏。本次游戏会话中已禁用 More Inventory Slots。",
   "Player": "玩家",
   "Wilderness": "荒野",
   "ShrinkConfirmPlayer": "缩小物品栏容量将会从你的物品栏中掉落 {0} 件物品到你脚边的地上。\n\n是否继续？",

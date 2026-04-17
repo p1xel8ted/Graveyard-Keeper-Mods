@@ -1,5 +1,6 @@
 {
   "DebugWarning": "Nota: la modalità debug è attivata. Non è consigliato lasciarla attiva a meno che tu non abbia un motivo specifico.",
+  "MisWarning": "More Inventory Slots è installato insieme a Where's Ma Storage. Entrambe le mod modificano le dimensioni degli inventari e vanno in conflitto — le pile di stoccaggio possono diventare invisibili quando superano il limite abituale. Per favore rimuovi More Inventory Slots. Where's Ma Storage offre già inventari più grandi per il giocatore e per i bauli tramite le proprie impostazioni. More Inventory Slots è stato disattivato per questa sessione.",
   "Player": "Giocatore",
   "Wilderness": "Natura selvaggia",
   "ShrinkConfirmPlayer": "Riducendo la dimensione dell'inventario, {0} oggetto/i del tuo inventario cadranno per terra accanto a te.\n\nContinuare?",

@@ -1,5 +1,6 @@
 {
   "DebugWarning": "Tryb debugowania jest włączony. Nie zaleca się pozostawiania go włączonego, chyba że masz ku temu powód.",
+  "MisWarning": "More Inventory Slots jest zainstalowany razem z Where's Ma Storage. Oba mody zmieniają rozmiar ekwipunku i będą ze sobą kolidować — stosy w magazynach mogą zniknąć po przekroczeniu zwykłego limitu. Proszę usunąć More Inventory Slots. Where's Ma Storage już udostępnia większe ekwipunki dla gracza i skrzyń w swoich własnych ustawieniach. More Inventory Slots został wyłączony na czas tej sesji.",
   "Player": "Gracz",
   "Wilderness": "Dzicz",
   "ShrinkConfirmPlayer": "Zmniejszenie rozmiaru ekwipunku spowoduje wyrzucenie {0} przedmiot(ów) z twojego ekwipunku na ziemię obok ciebie.\n\nKontynuować?",

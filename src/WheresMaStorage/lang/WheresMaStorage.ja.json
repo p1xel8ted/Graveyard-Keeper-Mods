@@ -1,5 +1,6 @@
 {
   "DebugWarning": "デバッグモードがオンになっています。目的がない限り、オフのままにすることをおすすめします。",
+  "MisWarning": "More Inventory Slots が Where's Ma Storage と一緒にインストールされています。両方のMODはインベントリのサイズを変更するため競合します — 通常の上限を超えると資材ストックの山が見えなくなることがあります。More Inventory Slots をアンインストールしてください。Where's Ma Storage は独自の設定でプレイヤーとチェストの容量を拡張できます。今回のセッションでは More Inventory Slots を無効化しました。",
   "Player": "プレイヤー",
   "Wilderness": "荒野",
   "ShrinkConfirmPlayer": "インベントリのサイズを縮小すると、あなたのインベントリから{0}個のアイテムが足元に落とされます。\n\n続けますか？",

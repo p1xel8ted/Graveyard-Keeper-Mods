@@ -1,5 +1,6 @@
 {
   "DebugWarning": "Ten en cuenta que el modo de depuración está activado. No se recomienda dejarlo activado a menos que tengas un propósito para ello.",
+  "MisWarning": "More Inventory Slots está instalado junto con Where's Ma Storage. Ambos mods modifican el tamaño del inventario y entrarán en conflicto — podrías ver desaparecer las pilas de almacenamiento cuando superan su límite habitual. Por favor, desinstala More Inventory Slots. Where's Ma Storage ya ofrece inventarios más grandes para el jugador y los cofres a través de sus propios ajustes. More Inventory Slots ha sido desactivado durante esta sesión.",
   "Player": "Jugador",
   "Wilderness": "Naturaleza",
   "ShrinkConfirmPlayer": "Reducir el tamaño del inventario hará caer {0} objeto(s) de tu inventario al suelo junto a ti.\n\n¿Continuar?",
