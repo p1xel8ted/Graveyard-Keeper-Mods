@@ -20,11 +20,6 @@ public static class Fields
     internal static bool DebugMessageShown { get; set; }
     internal static bool MisWarningShown { get; set; }
 
-    internal static readonly string[] AlwaysHidePartials =
-    [
-        "refugee_camp_well", "refugee_camp_tent", "pump", "pallet", "refugee_camp_well_2"
-    ];
-
     internal static readonly string[] ChiselItems =
     [
         "chisel"
@@ -46,16 +41,8 @@ public static class Fields
         "sin_shard", "sin_shard_body_part"
     ];
 
-    internal static readonly string[] StockpileWidgetsPartials =
-    [
-        "mf_stones", "mf_ore", "mf_timber"
-    ];
-
     // Zone-level skip list (used when iterating WorldZones in LoadInventories)
     internal static readonly string[] AlwaysSkipZones = ["bat", "slime", "refugees", "bee", "refugee", "npc_tavern_barman", "soul_container", "box_pallet"];
-
-    // Inventory-level skip list (used when filtering individual inventories/objects)
-    internal static readonly string[] AlwaysSkipInventories = ["slime", "bat", "refugees", "refugee", "bush_berry", "tree_apple", "bee"];
 
     internal static bool GameBalanceAlreadyRun { get; set; }
     internal static bool GratitudeCraft { get; set; }
@@ -82,14 +69,7 @@ public static class Fields
     internal static bool StackSizesDirty { get; set; }
     internal static bool ToolDestroyDirty { get; set; }
 
-    // Interaction state (replaces CrossModFields.Is* / CurrentWgoInteraction)
+    // The world object the player is currently interacting with. Reset when all GUIs close.
+    // Used as the context source for WmsSourceKind classification in ShouldForcePersonalOnly etc.
     internal static WorldGameObject CurrentWgoInteraction { get; set; }
-    internal static bool IsVendor { get; set; }
-    internal static bool IsCraft { get; set; }
-    internal static bool IsChest { get; set; }
-    internal static bool IsBarman { get; set; }
-    internal static bool IsTavernCellarRack { get; set; }
-    internal static bool IsWritersTable { get; set; }
-    internal static bool IsSoulBox { get; set; }
-    internal static bool IsChurchPulpit { get; set; }
 }

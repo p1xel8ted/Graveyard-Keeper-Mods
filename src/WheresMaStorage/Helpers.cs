@@ -685,15 +685,7 @@ public static class Helpers
 
     internal static void ResetInteractionFlags()
     {
-        if (Plugin.DebugEnabled) Log("[ResetFlags] clearing all interaction flags and CurrentWgoInteraction");
+        if (Plugin.DebugEnabled) Log("[ResetFlags] clearing CurrentWgoInteraction");
         Fields.CurrentWgoInteraction = null;
-        Fields.IsVendor = false;
-        Fields.IsCraft = false;
-        Fields.IsChest = false;
-        Fields.IsBarman = false;
-        Fields.IsTavernCellarRack = false;
-        Fields.IsWritersTable = false;
-        Fields.IsSoulBox = false;
-        Fields.IsChurchPulpit = false;
     }
 }

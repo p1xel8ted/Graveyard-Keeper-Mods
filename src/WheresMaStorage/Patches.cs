@@ -17,56 +17,14 @@ public static class Patches
         return IsVendorLike(Fields.CurrentWgoInteraction) ? Fields.CurrentWgoInteraction : null;
     }
 
-    private static WmsPanelKind ClassifyPanelKind(InventoryPanelGUI panel, WorldGameObject activeInteraction = null)
-    {
-        if (panel == null) return WmsPanelKind.Unknown;
-
-        var panelNameLower = panel.name.ToLowerInvariant();
-        var looksVendor = panelNameLower.Contains(Fields.Vendor);
-        var looksChest = panelNameLower.Contains(Fields.Chest);
-        var looksPlayer = panelNameLower.Contains(Fields.Player) ||
-                          panelNameLower.Contains(Fields.Multi) && !looksChest && !looksVendor;
-
-        if (looksPlayer) return WmsPanelKind.Player;
-        if (IsVendorLike(activeInteraction) && !looksPlayer) return WmsPanelKind.Vendor;
-        if (looksVendor) return WmsPanelKind.Vendor;
-        if (looksChest) return WmsPanelKind.Chest;
-        if (panelNameLower.Contains("resource")) return WmsPanelKind.Resource;
-        return WmsPanelKind.Unknown;
-    }
-
-    private static WmsPanelKind SetPanelKind(InventoryPanelGUI panel, WorldGameObject activeInteraction = null)
-    {
-        if (panel == null) return WmsPanelKind.Unknown;
-
-        var interaction = activeInteraction ?? Fields.CurrentWgoInteraction;
-        var marker = panel.GetComponent<WmsPanelMarker>() ?? panel.gameObject.AddComponent<WmsPanelMarker>();
-        marker.Kind = ClassifyPanelKind(panel, interaction);
-        marker.InteractionObjId = interaction?.obj_id ?? string.Empty;
-        return marker.Kind;
-    }
-
-    private static WmsPanelKind GetPanelKind(InventoryPanelGUI panel)
-    {
-        if (panel == null) return WmsPanelKind.Unknown;
-        return panel.TryGetComponent<WmsPanelMarker>(out var marker)
-            ? marker.Kind
-            : SetPanelKind(panel, Fields.CurrentWgoInteraction);
-    }
-
     private static bool IsVendorUiPanel(InventoryPanelGUI panel)
     {
-        return GetPanelKind(panel) == WmsPanelKind.Vendor;
+        return Classifiers.GetPanelKind(panel) == WmsPanelKind.Vendor;
     }
 
     private static bool IsPlayerUiPanel(InventoryPanelGUI panel)
     {
-        return GetPanelKind(panel) == WmsPanelKind.Player;
-    }
-
-    private static bool IsResourceLikePanel(WmsPanelKind panelKind)
-    {
-        return panelKind is WmsPanelKind.Resource or WmsPanelKind.Unknown;
+        return Classifiers.GetPanelKind(panel) == WmsPanelKind.Player;
     }
 
     private static bool ShouldSkipVendorInventorySource(WorldGameObject wgo)
@@ -82,12 +40,13 @@ public static class Patches
 
     private static bool ShouldForcePersonalOnly(InventoryPanelGUI panel = null)
     {
-        return Plugin.ShowOnlyPersonalInventory.Value ||
-               GetActiveVendorInteraction() != null && IsPlayerUiPanel(panel) ||
-               Fields.IsTavernCellarRack ||
-               Fields.IsSoulBox ||
-               Fields.IsChest ||
-               Fields.IsWritersTable;
+        if (Plugin.ShowOnlyPersonalInventory.Value) return true;
+
+        var source = Classifiers.GetSourceKind(Fields.CurrentWgoInteraction);
+        if (source.IsVendorLike() && IsPlayerUiPanel(panel)) return true;
+
+        return source is WmsSourceKind.TavernCellar or WmsSourceKind.SoulBox or
+                         WmsSourceKind.Chest or WmsSourceKind.WritersTable;
     }
 
     // Replaces Actions.GameStartedPlaying += Helpers.RunWmsTasks
@@ -142,16 +101,9 @@ public static class Patches
         if (!MainGame.game_started || __instance == null) return;
 
         Fields.CurrentWgoInteraction = __instance;
-        Fields.IsVendor = __instance.vendor != null;
-        Fields.IsCraft = other_obj.is_player && __instance.obj_def.interaction_type != ObjectDefinition.InteractionType.Chest && __instance.obj_def.has_craft;
-        Fields.IsChest = __instance.obj_def.interaction_type == ObjectDefinition.InteractionType.Chest;
-        Fields.IsBarman = __instance.obj_id.ToLowerInvariant().Contains("barman");
-        Fields.IsTavernCellarRack = __instance.obj_id.ToLowerInvariant().Contains("tavern_cellar_rack");
-        Fields.IsWritersTable = __instance.obj_id.ToLowerInvariant().Contains("writer");
-        Fields.IsSoulBox = __instance.obj_id.ToLowerInvariant().Contains("soul_container");
-        Fields.IsChurchPulpit = __instance.obj_id.ToLowerInvariant().Contains("pulpit");
+        var source = Classifiers.GetSourceKind(__instance);
 
-        if (Plugin.DebugEnabled && (Fields.IsVendor || Fields.IsBarman))
+        if (Plugin.DebugEnabled && source.IsVendorLike())
         {
             Helpers.LogVendorInventorySnapshot("interact", __instance);
         }
@@ -159,10 +111,7 @@ public static class Patches
         if (Plugin.DebugEnabled)
         {
             Helpers.Log($"[Interact] obj={__instance.obj_id} zone={__instance.GetMyWorldZoneId()} " +
-                        $"type={__instance.obj_def.interaction_type} " +
-                        $"flags={{Vendor={Fields.IsVendor},Craft={Fields.IsCraft},Chest={Fields.IsChest}," +
-                        $"Barman={Fields.IsBarman},TavernCellar={Fields.IsTavernCellarRack},Writer={Fields.IsWritersTable}," +
-                        $"SoulBox={Fields.IsSoulBox},Pulpit={Fields.IsChurchPulpit}}}");
+                        $"type={__instance.obj_def.interaction_type} kind={source}");
         }
 
         if (__instance.obj_def.inventory_size > 0)
@@ -262,65 +211,51 @@ public static class Patches
         }
 
         var objId = __instance.obj_id;
-        var objDefId = __instance.obj_def.id;
         var worldZoneId = __instance.GetMyWorldZoneId();
+        var source = Classifiers.GetSourceKind(__instance);
 
-        if (ShouldSkipVendorInventorySource(__instance))
+        if (source.IsAlwaysSkip())
         {
-            if (Plugin.DebugEnabled) Helpers.Log($"[GetMultiInventory] skip (vendor/barman interaction) obj={objId} zone={worldZoneId} current={Fields.CurrentWgoInteraction?.obj_id}");
+            if (Plugin.DebugEnabled) Helpers.Log($"[GetMultiInventory] skip (AlwaysSkip source) obj={objId} zone={worldZoneId}");
             return true;
         }
 
-        var isQuarry = worldZoneId.Contains("stone_workyard") || worldZoneId.Contains("marble_deposit");
-        var isWell = objId.Contains("well");
-        var isZombieMill = worldZoneId.Contains("zombie_mill");
-
-        if (Fields.AlwaysSkipInventories.Any(skipItem => objId.Contains(skipItem) || objDefId.Contains(skipItem) || worldZoneId.Contains(skipItem)))
+        if (source.IsVendorLike())
         {
-            if (Plugin.DebugEnabled) Helpers.Log($"[GetMultiInventory] skip (AlwaysSkipInventories match) obj={objId} zone={worldZoneId}");
+            if (Plugin.DebugEnabled) Helpers.Log($"[GetMultiInventory] skip (vendor/barman source) obj={objId} zone={worldZoneId} kind={source}");
             return true;
         }
 
-        if (Plugin.ExcludeWellsFromSharedInventory.Value && isWell)
+        if (source == WmsSourceKind.Well && Plugin.ExcludeWellsFromSharedInventory.Value)
         {
             if (Plugin.DebugEnabled) Helpers.Log($"[GetMultiInventory] skip (well exclusion) obj={objId}");
             return true;
         }
 
-        if (Plugin.ExcludeZombieMillFromSharedInventory.Value && isZombieMill)
+        if (source == WmsSourceKind.ZombieMill && Plugin.ExcludeZombieMillFromSharedInventory.Value)
         {
             if (Plugin.DebugEnabled) Helpers.Log($"[GetMultiInventory] skip (zombie mill exclusion) obj={objId} zone={worldZoneId}");
             return true;
         }
 
-        var isZombieWorker = __instance.has_linked_worker && __instance.linked_worker.obj_id.Contains("zombie") || objDefId.Contains("zombie");
-        Fields.ZombieWorker = isZombieWorker;
+        Fields.ZombieWorker = source == WmsSourceKind.ZombieWorker;
 
-        if (isZombieWorker && !Plugin.AllowZombiesAccessToSharedInventory.Value)
+        if (source == WmsSourceKind.ZombieWorker && !Plugin.AllowZombiesAccessToSharedInventory.Value)
         {
             if (Plugin.DebugEnabled) Helpers.Log($"[GetMultiInventory] skip (zombie worker, shared disallowed) obj={objId}");
             return true;
         }
 
-        var proceed = objId.Contains("church_pulpit") ||
-                      Fields.IsCraft ||
-                      isZombieWorker ||
-                      objId.Contains("compost") ||
-                      __instance.IsWorker() ||
-                      __instance.IsInvisibleWorker() ||
-                      __instance.is_player ||
-                      objId.StartsWith("mf_");
-
-        if (!proceed)
+        if (!source.ProceedForSharedInventory())
         {
-            if (Plugin.DebugEnabled) Helpers.Log($"[GetMultiInventory] no-proceed (no match) obj={objId} zone={worldZoneId}");
+            if (Plugin.DebugEnabled) Helpers.Log($"[GetMultiInventory] no-proceed (kind={source}) obj={objId} zone={worldZoneId}");
             return true;
         }
 
         var inv = Invents.GetMiInventory(objId, worldZoneId);
         __result = inv;
 
-        if (Plugin.DebugEnabled) Helpers.Log($"[GetMultiInventory] injected shared multi ({inv.all.Count} inventories) for obj={objId} zone={worldZoneId}");
+        if (Plugin.DebugEnabled) Helpers.Log($"[GetMultiInventory] injected shared multi ({inv.all.Count} inventories) for obj={objId} zone={worldZoneId} kind={source}");
         return false;
     }
 
@@ -398,43 +333,38 @@ public static class Patches
 
         var crafteryWGO = __instance.GetCrafteryWGO();
         var crafteryObjId = crafteryWGO.obj_id;
-        var crafteryObjDefId = crafteryWGO.obj_def.id;
-        var instanceName = __instance.name;
         var crafteryWzId = crafteryWGO.GetMyWorldZoneId();
+        var instanceName = __instance.name;
+        var source = Classifiers.GetSourceKind(crafteryWGO);
 
-        if (Fields.AlwaysSkipInventories.Any(a => crafteryObjId.Contains(a) || crafteryObjDefId.Contains(a) || crafteryWzId.Contains(a)))
+        if (source.IsAlwaysSkip())
         {
-            if (Plugin.DebugEnabled) Helpers.Log($"[BaseCraftGUI] skip (AlwaysSkipInventories match) obj={crafteryObjId} zone={crafteryWzId}");
+            if (Plugin.DebugEnabled) Helpers.Log($"[BaseCraftGUI] skip (AlwaysSkip source) obj={crafteryObjId} zone={crafteryWzId}");
             return;
         }
 
-        var isQuarry = crafteryWzId.Contains("stone_workyard") || crafteryWzId.Contains("marble_deposit");
-        var isWell = crafteryObjId.Contains("well") || crafteryObjDefId.Contains("well");
-        var isZombieMill = crafteryWzId.Contains("zombie_mill");
+        Fields.ZombieWorker = source == WmsSourceKind.ZombieWorker;
 
-        var isZombie = crafteryObjId.Contains("zombie") || crafteryObjDefId.Contains("zombie");
-        Fields.ZombieWorker = isZombie;
-
-        if (Plugin.ExcludeWellsFromSharedInventory.Value && isWell)
+        if (source == WmsSourceKind.Well && Plugin.ExcludeWellsFromSharedInventory.Value)
         {
             if (Plugin.DebugEnabled) Helpers.Log($"[BaseCraftGUI] skip (well exclusion) obj={crafteryObjId}");
             return;
         }
 
-        if (Plugin.ExcludeZombieMillFromSharedInventory.Value && isZombieMill)
+        if (source == WmsSourceKind.ZombieMill && Plugin.ExcludeZombieMillFromSharedInventory.Value)
         {
             if (Plugin.DebugEnabled) Helpers.Log($"[BaseCraftGUI] skip (zombie mill exclusion) obj={crafteryObjId} zone={crafteryWzId}");
             return;
         }
 
-        if (!Plugin.AllowZombiesAccessToSharedInventory.Value && isZombie)
+        if (source == WmsSourceKind.ZombieWorker && !Plugin.AllowZombiesAccessToSharedInventory.Value)
         {
             if (Plugin.DebugEnabled) Helpers.Log($"[BaseCraftGUI] skip (zombie, shared disallowed) obj={crafteryObjId}");
             return;
         }
 
-        __result = Invents.GetMiInventory($"[BaseCraftGUI.multi_inventory (Getter)]: {instanceName}, Craftery: {crafteryObjId}", crafteryWGO.GetMyWorldZoneId());
-        if (Plugin.DebugEnabled) Helpers.Log($"[BaseCraftGUI] injected shared multi ({__result.all.Count} inventories) panel={instanceName} obj={crafteryObjId} zone={crafteryWzId}");
+        __result = Invents.GetMiInventory($"[BaseCraftGUI.multi_inventory (Getter)]: {instanceName}, Craftery: {crafteryObjId}", crafteryWzId);
+        if (Plugin.DebugEnabled) Helpers.Log($"[BaseCraftGUI] injected shared multi ({__result.all.Count} inventories) panel={instanceName} obj={crafteryObjId} zone={crafteryWzId} kind={source}");
     }
 
 
@@ -482,7 +412,7 @@ public static class Patches
         ref MultiInventory multi_inventory)
     {
         var activeVendorInteraction = GetActiveVendorInteraction();
-        var panelKind = SetPanelKind(__instance, activeVendorInteraction);
+        var panelKind = Classifiers.RefreshPanelKind(__instance);
         var isVendorPanel = panelKind == WmsPanelKind.Vendor;
         var isPlayerPanel = panelKind == WmsPanelKind.Player;
 
@@ -546,9 +476,10 @@ public static class Patches
 
         __instance.dont_show_empty_rows = Plugin.DontShowEmptyRowsInInventory.Value;
 
-        if (Fields.IsCraft || Fields.IsChurchPulpit)
+        var interactionSource = Classifiers.GetSourceKind(Fields.CurrentWgoInteraction);
+        if (interactionSource is WmsSourceKind.CraftStation or WmsSourceKind.ChurchPulpit)
         {
-            if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Prefix] skip (flag match Craft={Fields.IsCraft}/Pulpit={Fields.IsChurchPulpit}) panel={__instance.name}");
+            if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Prefix] skip (kind={interactionSource}) panel={__instance.name}");
             return;
         }
 
@@ -584,7 +515,7 @@ public static class Patches
                     onlyMineInventory.AddInventory(multi_inventory.all[i + 1]);
                 }
             }
-            if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Prefix] replaced multi (ShowOnly={Plugin.ShowOnlyPersonalInventory.Value},VendorLike={GetActiveVendorInteraction() != null},Barman={Fields.IsBarman},TavernCellar={Fields.IsTavernCellarRack},SoulBox={Fields.IsSoulBox},Chest={Fields.IsChest},Writer={Fields.IsWritersTable}) panel={__instance.name} ({multi_inventory.all.Count} → {onlyMineInventory.all.Count} inventories, {bagCount} bags)");
+            if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Prefix] replaced multi (ShowOnly={Plugin.ShowOnlyPersonalInventory.Value},sourceKind={interactionSource}) panel={__instance.name} ({multi_inventory.all.Count} → {onlyMineInventory.all.Count} inventories, {bagCount} bags)");
             multi_inventory = onlyMineInventory;
         }
     }
@@ -599,19 +530,22 @@ public static class Patches
             return;
         }
 
-        var panelKind = GetPanelKind(__instance);
+        var panelKind = Classifiers.GetPanelKind(__instance);
+        var interactionSource = Classifiers.GetSourceKind(Fields.CurrentWgoInteraction);
+        Classifiers.StampWidgets(__instance, panelKind, interactionSource);
+
         var isChestPanel = panelKind == WmsPanelKind.Chest;
         var isVendorPanel = panelKind == WmsPanelKind.Vendor;
         var isPlayerPanel = panelKind == WmsPanelKind.Player;
-        var isResourcePanelProbably = IsResourceLikePanel(panelKind);
+        var isResourcePanel = panelKind == WmsPanelKind.Resource;
 
-        if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Postfix] panel={__instance.name} kind={panelKind.ToString().ToLowerInvariant()}");
+        if (Plugin.DebugEnabled) Helpers.Log($"[DoOpening:Postfix] panel={__instance.name} kind={panelKind.ToString().ToLowerInvariant()} source={interactionSource}");
 
         foreach (var a in __instance._separators)
         {
             if (Plugin.RemoveGapsBetweenSections.Value && isPlayerPanel ||
                 Plugin.RemoveGapsBetweenSectionsVendor.Value && isVendorPanel ||
-                isResourcePanelProbably)
+                isResourcePanel)
             {
                 a.Hide();
             }
@@ -619,18 +553,31 @@ public static class Patches
 
         foreach (var a in __instance._custom_widgets)
         {
-            if (isResourcePanelProbably ||
-                Fields.AlwaysHidePartials.Any(partial => a.inventory_data.id.Contains(partial)))
+            var marker = a.GetComponent<WmsWidgetMarker>();
+            var widgetKind = marker?.Kind ?? WmsWidgetKind.Unknown;
+            var shouldHide = marker != null && marker.ShouldHide;
+            if (Plugin.DebugEnabled)
+            {
+                Helpers.Log($"[DoOpening:Postfix] custom widget id={a.inventory_data?.id} kind={widgetKind} shouldHide={shouldHide} resourcePanel={isResourcePanel}");
+            }
+            if (isResourcePanel || shouldHide)
             {
                 a.Deactivate();
             }
-
-            HideWidgets(a);
         }
 
         foreach (var a in __instance._widgets)
         {
-            if (isResourcePanelProbably || isPlayerPanel || isChestPanel)
+            var marker = a.GetComponent<WmsWidgetMarker>();
+            var widgetKind = marker?.Kind ?? WmsWidgetKind.Unknown;
+            var shouldHide = marker != null && marker.ShouldHide;
+
+            if (Plugin.DebugEnabled)
+            {
+                Helpers.Log($"[DoOpening:Postfix] widget id={a.inventory_data?.id} kind={widgetKind} shouldHide={shouldHide} panelKind={panelKind}");
+            }
+
+            if (isResourcePanel || isPlayerPanel || isChestPanel)
             {
                 if (a.gameObject.activeSelf)
                 {
@@ -638,35 +585,9 @@ public static class Patches
                 }
             }
 
-            if (Fields.AlwaysHidePartials.Any(partial => a.inventory_data.id.Contains(partial)))
+            if (shouldHide)
             {
                 a.Deactivate();
-            }
-
-            HideWidgets(a);
-        }
-
-        return;
-
-        void HideWidgets(BaseInventoryWidget a)
-        {
-            if (isVendorPanel ||
-                Fields.IsBarman ||
-                Fields.IsTavernCellarRack ||
-                Fields.IsSoulBox ||
-                Fields.IsChurchPulpit) return;
-
-            var id = a.inventory_data.id;
-            if (Plugin.HideSoulWidgets.Value && id.Contains(Fields.Soul) ||
-                Plugin.HideStockpileWidgets.Value &&
-                Fields.StockpileWidgetsPartials.Any(partial => id.Contains(partial)) ||
-                Plugin.HideTavernWidgets.Value && id.Contains(Fields.Tavern) ||
-                Plugin.HideWarehouseShopWidgets.Value && id.Contains(Fields.Storage))
-            {
-                if (!id.Contains(Fields.Writer))
-                {
-                    a.Deactivate();
-                }
             }
         }
     }
@@ -715,7 +636,7 @@ public static class Patches
     {
         if (ShouldSkipVendorUiProcessing(__instance)) return;
 
-        var panelKind = GetPanelKind(__instance);
+        var panelKind = Classifiers.GetPanelKind(__instance);
         var isChest = panelKind == WmsPanelKind.Chest;
         var isPlayer = panelKind == WmsPanelKind.Player;
 

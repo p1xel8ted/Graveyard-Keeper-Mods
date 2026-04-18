@@ -12,5 +12,4 @@ public enum WmsPanelKind
 public sealed class WmsPanelMarker : MonoBehaviour
 {
     public WmsPanelKind Kind = WmsPanelKind.Unknown;
-    public string InteractionObjId = string.Empty;
 }
