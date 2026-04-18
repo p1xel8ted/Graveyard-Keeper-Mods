@@ -17,8 +17,12 @@ public static class Fields
 
     internal const string ShippingBoxTag = "shipping_box";
     internal const string MoreInventorySlotsGuid = "MoreInventorySlots";
-    internal static bool DebugMessageShown { get; set; }
     internal static bool MisWarningShown { get; set; }
+
+    internal static readonly string[] AlwaysHidePartials =
+    [
+        "refugee_camp_well", "refugee_camp_tent", "pump", "pallet", "refugee_camp_well_2"
+    ];
 
     internal static readonly string[] ChiselItems =
     [
