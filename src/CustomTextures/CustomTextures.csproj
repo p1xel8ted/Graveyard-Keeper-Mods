@@ -3,6 +3,8 @@
     <Version>0.1.2</Version>
     <BepInExPluginGuid>p1xel8ted.gyk.customtextures</BepInExPluginGuid>
     <BepInExPluginName>Custom Textures</BepInExPluginName>
+    <!-- Internal/unreleased: source preserved, not shipped. Remove NoBuild to build/zip again. -->
+    <NoBuild>true</NoBuild>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\Shared\StartupLogger.cs" Link="StartupLogger.cs"/>
