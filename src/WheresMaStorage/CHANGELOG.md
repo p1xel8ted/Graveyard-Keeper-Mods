@@ -2,6 +2,8 @@
 
 ## 2.1.14 | 18 April 2026
 
+- Fixed a duplicate "Player (7/7)" widget appearing next to your bag when you opened the inventory — that was your tool belt, which the game already shows in its own dedicated slot strip
+- New "Hide Bag Widgets" option (UI section, on by default) — bags and backpacks you're carrying no longer get their own expanded widget in the inventory panel. Right-click the bag icon to open it as before. Turn the option off if you prefer the old inline look
 - Fixed Chinese translations not loading
 - If "More Inventory Slots" is installed alongside Where's Ma Storage, its inventory-size overrides are now automatically disabled at the main menu. Both mods change inventory sizes in incompatible ways and together caused stockpile piles to disappear once filled past the usual limit, and merchant trade tabs to show up empty. You'll still see the translated one-time warning explaining what happened and recommending you uninstall More Inventory Slots permanently.
 - Added an update notice on the main menu that flags when this mod (or others in this collection) has a newer version on Nexus. Click an entry to open its Nexus page. Toggle off in settings if you'd rather not see it
