@@ -1048,15 +1048,17 @@ _ul
 # Serena AI tool
 .serena/
 
-# NexusMods upload tooling (contains API keys via Environment.props)
-**/nexus-upload.ps1
-**/nexus-pull.ps1
-**/nexus-version.bat
-**/publish.bat
-**/upload.target
-**/NexusGroupIDS.csv
+# Local dev-only aids — never tracked (scripts that read the Nexus API key from Environment.props, personal checklists, throwaway generators)
+*.ps1
+*.bat
+*.py
+*.xlsx
 
-# Allow GYK mapping CSV (read by update-notifier GitHub Action; contains no secrets)
+# NexusMods upload MSBuild target (when present)
+**/upload.target
+
+# Nexus group IDs CSV — ignore anywhere, allow only at repo root (read by the CI manifest workflow; no secrets)
+**/NexusGroupIDS.csv
 !NexusGroupIDS.csv
 
 # Decompiled game code, work summaries, audit docs, user reports
