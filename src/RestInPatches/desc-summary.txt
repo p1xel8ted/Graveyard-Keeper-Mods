@@ -1,0 +1,1 @@
+A growing collection of fixes for vanilla annoyances: missing craft-window arrow icons (broken by the April 2026 patch), juddery player movement, footprints that pop instead of fade, log spam from harmless exceptions, mute/run-while-unfocused toggles, and stockpiles staying visible past their vanilla cap.

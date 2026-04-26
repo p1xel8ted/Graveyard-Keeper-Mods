@@ -1,0 +1,1 @@
+Lifts the quality cap on grave bodies and decorations to 30, so the bishop pays full price for your finest cadavers and your fanciest fences. Cap is configurable if 30 feels excessive (or insufficient — no judgement). BepInEx remake of the original Grave Changes.

@@ -1,0 +1,1 @@
+Moves the 'New Game' option to the bottom of the save list, so an absent-minded Continue tap doesn't accidentally launch a fresh playthrough an hour before bed.

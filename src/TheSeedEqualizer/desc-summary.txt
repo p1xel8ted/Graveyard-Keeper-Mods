@@ -1,0 +1,1 @@
+Makes the zombie garden, vineyard, and refugee farms output at least the seeds they consumed, so you stop bleeding inventory the more you plant. Configurable if you want even more generous returns.

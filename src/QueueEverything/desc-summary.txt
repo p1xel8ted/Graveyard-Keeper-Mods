@@ -1,0 +1,1 @@
+Lets you queue almost anything in the game, including the multi-quality items vanilla refuses to let you queue. Optional auto-mode for the truly hands-off keeper. The asterisk is doing some work, but most of what you'd want, you can queue.

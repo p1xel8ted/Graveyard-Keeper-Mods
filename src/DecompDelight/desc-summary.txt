@@ -1,0 +1,1 @@
+Tells you what element (Chaos, Life, Death, etc.) each item will yield before you toss it into the mill, mixer, or distillation cube. No more turning your last dragonfly into the wrong flask. Remake of Item Description - Display Element.

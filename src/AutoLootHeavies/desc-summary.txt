@@ -1,0 +1,1 @@
+Heavy drops (timber, stone, marble, ore) teleport straight to the nearest stockpile with space, with a per-resource dump-site fallback when the stockpiles fill up. Optional Immersive Mode charges 3 energy per teleport so it doesn't feel free. Master toggle, rebindable keys, and a performance slider if you want to tune the scan rate.

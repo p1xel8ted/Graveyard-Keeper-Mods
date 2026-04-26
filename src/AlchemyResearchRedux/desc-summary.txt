@@ -1,0 +1,1 @@
+Adds a live preview of the result the moment you drop ingredients into any alchemy mixer, so you stop gambling flasks on hunches. Works across the mill, mixer, and distillation cube. BepInEx remake of the original Alchemy Research.

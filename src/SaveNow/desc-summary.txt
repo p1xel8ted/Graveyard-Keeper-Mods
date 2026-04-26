@@ -1,0 +1,1 @@
+Save whenever, wherever. Adds a save-anywhere keybind, configurable auto-save, and rolling save backups in case the autopsy goes sideways. Sleep is no longer the only checkpoint.
