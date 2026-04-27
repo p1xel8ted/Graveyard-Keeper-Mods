@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.5.12 | 18 April 2026
+## 2.5.12 | 27 April 2026
 
 - Fixed Chinese translations not loading
 - Fixed saving staying blocked after using a teleport stone to leave a dungeon

@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.2.11 | 18 April 2026
+## 2.2.11 | 27 April 2026
 
 - Reminders now wait a couple of seconds after you wake up, so the message isn't hidden behind the sleep screen while it fades. Adjust under Wake-Up Delay, or set it to 0 for instant reminders
 - Fixed Chinese translations not loading

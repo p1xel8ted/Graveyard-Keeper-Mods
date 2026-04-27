@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.8 | 18 April 2026
+## 0.1.8 | 27 April 2026
 
 - Incense burners now burn forever and auto-light on placement, just like candelabras
 - Added a separate keybind for extinguishing the nearest lit incense and recovering the unused incense. Unbound by default — set a key or controller button in the Controls section if you want to use it. The candle keybind (C / D-Pad Up) only touches candles, so candle-only players keep their existing experience

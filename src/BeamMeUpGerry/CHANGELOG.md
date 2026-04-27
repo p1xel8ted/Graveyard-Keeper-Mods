@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.1.5 | 18 April 2026
+## 3.1.5 | 27 April 2026
 
 - Fixed area-gated buildings (such as the quarry mining hut) being impossible to build after teleporting to a zone you hadn't walked into yet. Teleport now triggers the same area-discovery and area-unlock events the game fires when you arrive on foot or via a story warp
 - Fixed Chinese translations not loading
