@@ -1,10 +1,10 @@
 # Changelog
 
-## 1.4.11 | 18 April 2026
+## 1.4.11 | 27 April 2026
 
 - Fixed tools wearing out faster than vanilla when gathering clay, stone, wood, and ore
 - Fixed Chinese translations not loading
-- Repair crafts (soul machines, broken buildings, etc.) no longer use the Craft Speed Multiplier — the per-frame energy cost could exceed your max energy, making some repairs impossible without infinite energy
+- Repair crafts (soul machines, broken buildings, etc.) no longer use the Craft Speed Multiplier — at high multipliers the energy cost climbed faster than your bar could refill, making some repairs impossible to start
 - Settings pane redone with clearer section headings and fuller descriptions for every option
 - Debug log output is less spammy — one line per craft session instead of one per frame
 - Enabling Debug Logging now shows a one-time in-game reminder so you don't forget it's on, with translations across all 11 supported languages

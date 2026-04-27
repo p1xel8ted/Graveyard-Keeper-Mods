@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.9.7 | 18 April 2026
+## 1.9.7 | 27 April 2026
 
 - Reduced Gerry's cut a touch at every unlock stage
 - Added an option to disable Gerry's cut entirely
@@ -10,7 +10,7 @@
 - Added an update notice on the main menu that flags when this mod (or others in this collection) has a newer version on Nexus. Click an entry to open its Nexus page. Toggle off in settings if you'd rather not see it
 - Settings pane tidied up: sections now use a cleaner `── Name ──` style and every option has a proper description. Your existing values carry across unchanged
 - Fixed Gerry occasionally getting stuck hovering above the shipping box — if something interrupted his midnight visit (the game saving mid-visit, a dialog stomping the routine, etc.) he could stay there blocking the trunk's tile on the placement grid. Any leftover Gerry is now cleared when the next morning rolls around, and also on the next load
-- Gerry no longer has a collider during his visit, so he doesn't take up a tile on the placement grid while he's out
+- Gerry no longer blocks building placement on the trunk's tile while hovering during his visit
 
 ## 1.9.6 | 15 April 2026
 
