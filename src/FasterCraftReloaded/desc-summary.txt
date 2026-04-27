@@ -1,1 +1,0 @@
-Speeds up crafting at every workbench, table, and station. Pick a multiplier and stop waiting real-time minutes for a single nail. Ported from Oldark's original FasterCraft (with permission) and rebuilt for the modern setup.

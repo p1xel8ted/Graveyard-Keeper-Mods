@@ -1,1 +1,0 @@
-Removes the inflation and deflation that creep into vendor prices the more you trade. Sell a hundred talking skulls without watching the price-per-skull halve before your eyes. Combines and rebuilds Fluffiest's and ithinkandicode's takes on the same problem.

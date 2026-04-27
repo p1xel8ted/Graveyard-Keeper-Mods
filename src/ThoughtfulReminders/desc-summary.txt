@@ -1,1 +1,0 @@
-Pops up a fresh thought every time the day changes — a gentle nudge about what you might want to do today. The closest thing GYK has to a daily standup, but with fewer JIRA references.

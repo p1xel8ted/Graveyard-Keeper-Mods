@@ -1,1 +1,0 @@
-Halves the rate at which energy drains, plus a few small fatigue tweaks. Doesn't feel OP — you'll still need to eat and sleep — just doesn't feel like you're running on fumes after pulling three weeds.

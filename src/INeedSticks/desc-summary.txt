@@ -1,1 +1,0 @@
-Adds Wooden Stick as a craftable item on the Circular Saw, because the moment you don't have one, you need fifty. No more scavenging the forest for kindling like a lost child.

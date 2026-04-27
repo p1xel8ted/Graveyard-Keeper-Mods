@@ -1,1 +1,0 @@
-Removes the fog and wind overlay effects. Cleaner, brighter, easier to see your three-pixel cabbage from across the screen. Atmosphere is overrated.

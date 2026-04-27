@@ -1,1 +1,0 @@
-Skips the 'are you sure?' prompt when you pick a body part on the autopsy table. You're sure. You've always been sure. The bishop is waiting.

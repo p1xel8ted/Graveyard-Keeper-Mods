@@ -1,1 +1,0 @@
-Slowly regenerate life and energy over time, configurable both ways. No more chugging beer mid-graveyard sweep just to keep going. Doesn't trivialise the difficulty curve unless you crank it that way. Updated continuation of Eurion's LifeEnergy_Regen.

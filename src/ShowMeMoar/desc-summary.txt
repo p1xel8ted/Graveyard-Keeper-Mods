@@ -1,1 +1,0 @@
-Adds your monitor's native resolution to the picker, plus granular control over zoom, UI scale, and on-screen positioning. Bind +/- to zoom in and out, or open F1 to fine-tune. Finally see the whole graveyard at once — or get up close to admire your cabbages.

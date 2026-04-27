@@ -1,1 +1,0 @@
-Skips the splash and studio logos at startup. Boots you straight to the menu so you can get to the corpses faster.

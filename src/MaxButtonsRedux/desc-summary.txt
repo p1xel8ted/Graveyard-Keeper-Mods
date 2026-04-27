@@ -1,1 +1,0 @@
-Adds one-click Min/Max buttons to crafting queues and vendor purchases, so you can clear a stack or queue 999 candles without holding the button down. Controller-friendly: works on the trigger too. Quietly the most-used button you'll never think about.

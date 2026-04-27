@@ -1,1 +1,0 @@
-Multiplies the things you actually want more of: tech points, faith, prayer donations, certain materials, happiness, gratitude. Each multiplier is independent so you can tune your dopamine intake precisely. Ports the multiplier suite from Keepers Toolkit.

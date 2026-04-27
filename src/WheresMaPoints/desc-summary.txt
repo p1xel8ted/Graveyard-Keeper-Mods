@@ -1,1 +1,0 @@
-Tech and XP points no longer spawn as collectible orbs — they go straight into your XP totals the moment you earn them. Side benefit: the massive performance hit from uncollected orbs piling up in the world goes away too.
