@@ -2,7 +2,7 @@
 
 ## 2.1.15 | 27 April 2026
 
-- Fixed saves not completing and sleeping in bed softlocking the game
+- Fixed a crash during the game-load loot sweep that could leave the mod in a broken state until the next restart
 
 ## 2.1.14 | 27 April 2026
 
