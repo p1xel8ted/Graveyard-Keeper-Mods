@@ -4,10 +4,7 @@
 
 - The +/- arrows are now also restored on items already sitting in your craft queue, not just the recipe list.
 - Config section headers restyled to the "── Name ──" look used by the rest of the collection. Existing settings carry over automatically.
-- The HUD no longer rebuilds its day and tech-point labels every frame — only when the values actually change.
-- The highlight sweep over ground items is now skipped when the nearest item has not changed since the last tick.
-- World-object event processing no longer does a redundant component lookup on every world object each frame when there are no pending events.
-- A handful of other small per-frame overhead reductions: shader colour writes, shadow queue processing, and durability tracking list maintenance.
+- Reduced unnecessary per-frame work across several systems (HUD labels, ground item highlighting, world-object processing, and a few others).
 
 ## 0.1.1 | 19 April 2026
 
