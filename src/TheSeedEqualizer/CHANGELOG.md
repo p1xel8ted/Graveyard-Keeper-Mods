@@ -4,7 +4,7 @@
 
 - Settings changes now take effect immediately without restarting the game
 - Log messages now include timestamps for easier bug reporting
-- Added an optional per-bed seed ledger that records every plant and harvest to plugins/TheSeedEqualizer/ledger.json so you can see exactly which crops are net-positive and which are bleeding seeds. Toggle it off in Tracking if you'd rather not write the file.
+- New per-bed seed ledger (Tracking section) — records every plant and harvest so you can spot which crops are net-positive and which are bleeding seeds. On by default; toggle off to disable.
 
 ## 1.3.11 | 27 April 2026
 
