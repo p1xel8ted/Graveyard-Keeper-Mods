@@ -2,6 +2,60 @@ namespace TheSeedEqualizer;
 
 public static class Helpers
 {
+    private readonly struct ItemSnapshot
+    {
+        public readonly Item Item;
+        public readonly SmartExpression OrigMin;
+        public readonly SmartExpression OrigMax;
+
+        public ItemSnapshot(Item item)
+        {
+            Item = item;
+            OrigMin = item.min_value;
+            OrigMax = item.max_value;
+        }
+    }
+
+    private static readonly List<ItemSnapshot> _expressionSnapshots = new();
+    private static readonly List<(CraftDefinition def, Item addedWaste)> _addedWasteSnapshots = new();
+    private static bool _captured;
+    private static int _nonLiteralMaxFallbacks;
+
+    // Reads the current upper bound on a seed-drop max_value without invoking
+    // SmartExpression's WGO-aware evaluator. The vanilla seed-drop max is almost
+    // always a numeric literal — for those, FromString sets _simplified=true and
+    // _simpified_float to the parsed value, so we get the same number EvaluateFloat
+    // would have returned. For non-literal expressions (perk-driven yield bonuses
+    // referencing WGOpar/@-syntax), evaluation at GameBalance load has no WGO and
+    // would log "WGO is null while evaluating expression" once per item, so we
+    // fall back to the floor and write a deterministic boost on top.
+    private static float ReadMaxBefore(SmartExpression expr, float floor, string itemId)
+    {
+        if (expr is null)
+        {
+            if (Plugin.DebugEnabled)
+            {
+                Log($"[ReadMaxBefore] expr=null on '{itemId}' → fallback to floor={floor}");
+            }
+            _nonLiteralMaxFallbacks++;
+            return floor;
+        }
+        if (expr._simplified)
+        {
+            if (Plugin.DebugEnabled)
+            {
+                Log($"[ReadMaxBefore] '{itemId}' simplified literal → {expr._simpified_float}");
+            }
+            return expr._simpified_float;
+        }
+        if (Plugin.DebugEnabled)
+        {
+            Log($"[ReadMaxBefore] '{itemId}' non-literal expr='{expr._expression}' → fallback to floor={floor} (avoiding WGO-null evaluation)");
+        }
+        _nonLiteralMaxFallbacks++;
+        return floor;
+    }
+
     internal static void Log(string message, bool error = false)
     {
         if (error)
@@ -69,9 +123,13 @@ public static class Helpers
                     Log($"[ModifyOutput/Obj] '{output.id}' min_value ← 4 (no craftDef '{craft}' found, default)");
                 }
             }
+            if (Plugin.DebugEnabled)
+            {
+                Log($"[ModifyOutput/Obj] '{output.id}' before — min='{output.min_value?._expression}', max='{output.max_value?._expression}'");
+            }
             output.min_value = SmartExpression.ParseExpression(minValue.ToString(CultureInfo.InvariantCulture));
 
-            var maxBefore = output.max_value.EvaluateFloat();
+            var maxBefore = ReadMaxBefore(output.max_value, minValue, output.id);
             var normalBoost = maxBefore + 2;
             var extraBoost = maxBefore + 4;
             var boost = Plugin.BoostPotentialSeedOutput.Value ? extraBoost : normalBoost;
@@ -95,9 +153,13 @@ public static class Helpers
         foreach (var output in seedOutputs)
         {
             var minValue = craft.needs[0].value;
+            if (Plugin.DebugEnabled)
+            {
+                Log($"[ModifyOutput/Craft] '{output.id}' before — min='{output.min_value?._expression}', max='{output.max_value?._expression}'");
+            }
             output.min_value = SmartExpression.ParseExpression(minValue.ToString(CultureInfo.InvariantCulture));
 
-            var maxBefore = output.max_value.EvaluateFloat();
+            var maxBefore = ReadMaxBefore(output.max_value, minValue, output.id);
             var normalBoost = maxBefore + 2;
             var extraBoost = maxBefore + 4;
             var boost = Plugin.BoostPotentialSeedOutput.Value ? extraBoost : normalBoost;
@@ -110,13 +172,112 @@ public static class Helpers
         }
     }
 
-    internal static void GameBalancePostfix()
+    // Initial run after GameBalance loads. Snapshots originals, then applies the mutations
+    // that the current config calls for. Snapshots are kept so toggling a setting later can
+    // revert the affected items to their originals before re-applying.
+    internal static void CaptureAndApply()
     {
         Plugin.Log.LogInfo("Running SeedEqualizer GameBalanceLoad as GameBalance has been loaded.");
+        if (Plugin.DebugEnabled)
+        {
+            Log("[CaptureAndApply] initial capture+apply pass starting");
+        }
+
+        _expressionSnapshots.Clear();
+        _addedWasteSnapshots.Clear();
+        _captured = false;
+        Apply();
+        _captured = true;
+    }
+
+    // Called from ConfigEntry.SettingChanged. Reverts every previously-applied mutation,
+    // then re-applies based on the new config. No-op until the first CaptureAndApply has run.
+    internal static void Reconcile()
+    {
+        if (!_captured)
+        {
+            return;
+        }
+        if (Plugin.DebugEnabled)
+        {
+            Log("[Reconcile] config changed — reverting + reapplying");
+        }
+        Revert();
+        Apply();
+    }
+
+    private static void Revert()
+    {
+        if (Plugin.DebugEnabled)
+        {
+            Log($"[Revert] reverting {_expressionSnapshots.Count} item snapshot(s) and removing {_addedWasteSnapshots.Count} added crop_waste output(s)");
+        }
+        foreach (var snap in _expressionSnapshots)
+        {
+            snap.Item.min_value = snap.OrigMin;
+            snap.Item.max_value = snap.OrigMax;
+        }
+        foreach (var (def, addedWaste) in _addedWasteSnapshots)
+        {
+            def.output.Remove(addedWaste);
+        }
+        _addedWasteSnapshots.Clear();
+    }
+
+    private static void CaptureAll()
+    {
+        foreach (var obj in GameBalance.me.objs_data)
+        {
+            if (!(obj.id.StartsWith("garden") && obj.id.EndsWith("ready")))
+            {
+                continue;
+            }
+            foreach (var item in obj.drop_items)
+            {
+                if (item.id.Contains("seed"))
+                {
+                    _expressionSnapshots.Add(new ItemSnapshot(item));
+                }
+            }
+        }
+
+        foreach (var craft in GameBalance.me.craft_data)
+        {
+            var matchesSeedFlow =
+                craft.id.Contains("grow_desk_planting") ||
+                craft.id.Contains("grow_vineyard_planting") ||
+                craft.id.StartsWith("refugee_garden");
+            if (!matchesSeedFlow)
+            {
+                continue;
+            }
+            foreach (var item in craft.output)
+            {
+                if (item.id.Contains("seed"))
+                {
+                    _expressionSnapshots.Add(new ItemSnapshot(item));
+                }
+            }
+        }
 
         if (Plugin.DebugEnabled)
         {
-            Log($"[GameBalancePostfix] config snapshot — playerGardens={Plugin.ModifyPlayerGardens.Value}, zombieGardens={Plugin.ModifyZombieGardens.Value}, zombieVineyards={Plugin.ModifyZombieVineyards.Value}, refugeeGardens={Plugin.ModifyRefugeeGardens.Value}, wasteToZGardens={Plugin.AddWasteToZombieGardens.Value}, wasteToZVineyards={Plugin.AddWasteToZombieVineyards.Value}, boostSeed={Plugin.BoostPotentialSeedOutput.Value}, rainGrowth={Plugin.BoostGrowSpeedWhenRaining.Value}");
+            Log($"[CaptureAll] snapshotted {_expressionSnapshots.Count} seed item(s) for revert");
+        }
+    }
+
+    private static void Apply()
+    {
+        if (!_captured)
+        {
+            CaptureAll();
+        }
+
+        _nonLiteralMaxFallbacks = 0;
+
+        if (Plugin.DebugEnabled)
+        {
+            Log($"[Apply] config snapshot — playerGardens={Plugin.ModifyPlayerGardens.Value}, zombieGardens={Plugin.ModifyZombieGardens.Value}, zombieVineyards={Plugin.ModifyZombieVineyards.Value}, refugeeGardens={Plugin.ModifyRefugeeGardens.Value}, wasteToZGardens={Plugin.AddWasteToZombieGardens.Value}, wasteToZVineyards={Plugin.AddWasteToZombieVineyards.Value}, boostSeed={Plugin.BoostPotentialSeedOutput.Value}, rainGrowth={Plugin.BoostGrowSpeedWhenRaining.Value}");
         }
 
         var playerGardenCandidates = GameBalance.me.objs_data
@@ -125,36 +286,36 @@ public static class Helpers
 
         if (Plugin.DebugEnabled)
         {
-            Log($"[GameBalancePostfix/PlayerGardens] scanning {playerGardenCandidates.Count} object definitions with seed drops");
+            Log($"[Apply/PlayerGardens] scanning {playerGardenCandidates.Count} object definitions with seed drops");
         }
 
         var playerModified = 0;
-        foreach (var craft in playerGardenCandidates)
+        foreach (var obj in playerGardenCandidates)
         {
             if (!Plugin.ModifyPlayerGardens.Value)
             {
                 continue;
             }
-            if (!(craft.id.StartsWith("garden") && craft.id.EndsWith("ready")))
+            if (!(obj.id.StartsWith("garden") && obj.id.EndsWith("ready")))
             {
                 if (Plugin.DebugEnabled)
                 {
-                    Log($"[GameBalancePostfix/PlayerGardens] skip '{craft.id}': not a garden_*_ready definition");
+                    Log($"[Apply/PlayerGardens] skip '{obj.id}': not a garden_*_ready definition");
                 }
                 continue;
             }
 
             if (Plugin.DebugEnabled)
             {
-                Log($"[GameBalancePostfix/PlayerGardens] modifying '{craft.id}'");
+                Log($"[Apply/PlayerGardens] modifying '{obj.id}'");
             }
-            ModifyOutput(craft);
+            ModifyOutput(obj);
             playerModified++;
         }
 
         if (Plugin.DebugEnabled)
         {
-            Log($"[GameBalancePostfix/PlayerGardens] modified {playerModified} player garden definitions (enabled={Plugin.ModifyPlayerGardens.Value})");
+            Log($"[Apply/PlayerGardens] modified {playerModified} player garden definitions (enabled={Plugin.ModifyPlayerGardens.Value})");
         }
 
         var craftCandidates = GameBalance.me.craft_data
@@ -163,7 +324,7 @@ public static class Helpers
 
         if (Plugin.DebugEnabled)
         {
-            Log($"[GameBalancePostfix/Crafts] scanning {craftCandidates.Count} craft definitions with seed inputs");
+            Log($"[Apply/Crafts] scanning {craftCandidates.Count} craft definitions with seed inputs");
         }
 
         var zombieModified = 0;
@@ -178,7 +339,7 @@ public static class Helpers
             {
                 if (Plugin.DebugEnabled)
                 {
-                    Log($"[GameBalancePostfix/ZombieGardens] modifying '{craft.id}'");
+                    Log($"[Apply/ZombieGardens] modifying '{craft.id}'");
                 }
                 ModifyOutput(craft);
                 zombieModified++;
@@ -188,7 +349,7 @@ public static class Helpers
             {
                 if (Plugin.DebugEnabled)
                 {
-                    Log($"[GameBalancePostfix/ZombieVineyards] modifying '{craft.id}'");
+                    Log($"[Apply/ZombieVineyards] modifying '{craft.id}'");
                 }
                 ModifyOutput(craft);
                 vineyardModified++;
@@ -198,7 +359,7 @@ public static class Helpers
             {
                 if (Plugin.DebugEnabled)
                 {
-                    Log($"[GameBalancePostfix/RefugeeGardens] modifying '{craft.id}'");
+                    Log($"[Apply/RefugeeGardens] modifying '{craft.id}'");
                 }
                 ModifyOutput(craft);
                 refugeeModified++;
@@ -208,7 +369,7 @@ public static class Helpers
             {
                 if (Plugin.DebugEnabled)
                 {
-                    Log($"[GameBalancePostfix/Waste] adding crop_waste 3-5 to vineyard craft '{craft.id}'");
+                    Log($"[Apply/Waste] adding crop_waste 3-5 to vineyard craft '{craft.id}'");
                 }
                 var item = new Item("crop_waste", 3)
                 {
@@ -217,13 +378,14 @@ public static class Helpers
                     self_chance = craft.needs[0].self_chance
                 };
                 craft.output.Add(item);
+                _addedWasteSnapshots.Add((craft, item));
                 wasteVineyardAdded++;
             }
             else if (craft.id.Contains("grow_vineyard_planting") && Plugin.AddWasteToZombieVineyards.Value)
             {
                 if (Plugin.DebugEnabled)
                 {
-                    Log($"[GameBalancePostfix/Waste] vineyard craft '{craft.id}' already drops crop_waste — skipping add");
+                    Log($"[Apply/Waste] vineyard craft '{craft.id}' already drops crop_waste — skipping add");
                 }
             }
 
@@ -231,7 +393,7 @@ public static class Helpers
             {
                 if (Plugin.DebugEnabled)
                 {
-                    Log($"[GameBalancePostfix/Waste] adding crop_waste 3-5 to garden craft '{craft.id}'");
+                    Log($"[Apply/Waste] adding crop_waste 3-5 to garden craft '{craft.id}'");
                 }
                 var item = new Item("crop_waste", 3)
                 {
@@ -240,20 +402,21 @@ public static class Helpers
                     self_chance = craft.needs[0].self_chance
                 };
                 craft.output.Add(item);
+                _addedWasteSnapshots.Add((craft, item));
                 wasteGardenAdded++;
             }
             else if (craft.id.Contains("grow_desk_planting") && Plugin.AddWasteToZombieGardens.Value)
             {
                 if (Plugin.DebugEnabled)
                 {
-                    Log($"[GameBalancePostfix/Waste] garden craft '{craft.id}' already drops crop_waste — skipping add");
+                    Log($"[Apply/Waste] garden craft '{craft.id}' already drops crop_waste — skipping add");
                 }
             }
         }
 
         if (Plugin.DebugEnabled)
         {
-            Log($"[GameBalancePostfix] done — zombieGardens={zombieModified}, zombieVineyards={vineyardModified}, refugeeGardens={refugeeModified}, wasteAdded(vineyards)={wasteVineyardAdded}, wasteAdded(gardens)={wasteGardenAdded}");
+            Log($"[Apply] done — zombieGardens={zombieModified}, zombieVineyards={vineyardModified}, refugeeGardens={refugeeModified}, wasteAdded(vineyards)={wasteVineyardAdded}, wasteAdded(gardens)={wasteGardenAdded}, nonLiteralMaxFallbacks={_nonLiteralMaxFallbacks}");
         }
     }
 }

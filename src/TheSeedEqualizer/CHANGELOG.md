@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.12 | 30 April 2026
+
+- Settings changes now take effect immediately without restarting the game
+- Log messages now include timestamps for easier bug reporting
+- Added an optional per-bed seed ledger that records every plant and harvest to plugins/TheSeedEqualizer/ledger.json so you can see exactly which crops are net-positive and which are bleeding seeds. Toggle it off in Tracking if you'd rather not write the file.
+
 ## 1.3.11 | 27 April 2026
 
 - Fixed Chinese translations not loading

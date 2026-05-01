@@ -13,6 +13,7 @@ public class Plugin : BaseUnityPlugin
     private const string RefugeeGardensSection = "── Refugee Gardens ──";
     private const string WasteSection          = "── Waste ──";
     private const string AllGardensSection     = "── All Gardens ──";
+    private const string TrackingSection       = "── Tracking ──";
     private const string UpdatesSection        = "── Updates ──";
 
     private static readonly Dictionary<string, string> SectionRenames = new()
@@ -32,7 +33,7 @@ public class Plugin : BaseUnityPlugin
         ["── 7. Updates ──"]         = UpdatesSection,
     };
 
-    internal static ManualLogSource Log { get; private set; }
+    internal static TimestampedLogger Log { get; private set; }
 
     internal static ConfigEntry<bool> Debug { get; private set; }
     internal static bool DebugEnabled;
@@ -45,19 +46,31 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<bool> AddWasteToZombieVineyards { get; private set; }
     internal static ConfigEntry<bool> BoostPotentialSeedOutput { get; private set; }
     internal static ConfigEntry<bool> BoostGrowSpeedWhenRaining { get; private set; }
+    internal static ConfigEntry<bool> TrackPlantCycles { get; private set; }
+    internal static ConfigEntry<bool> DebugTracking { get; private set; }
     internal static ConfigEntry<bool> CheckForUpdates { get; private set; }
 
     private void Awake()
     {
-        Log = Logger;
-        LogHelper.Log = Logger;
+        Log = new TimestampedLogger(Logger);
+        LogHelper.Log = Log;
         MigrateRenamedSections();
         InitConfiguration();
         Lang.Init(Assembly.GetExecutingAssembly(), Log);
         UpdateChecker.Register(Info, CheckForUpdates);
         DebugWarningDialog.Register(MyPluginInfo.PLUGIN_NAME, () => DebugEnabled);
         Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), MyPluginInfo.PLUGIN_GUID);
+
+        ModifyPlayerGardens.SettingChanged       += OnSeedSettingChanged;
+        ModifyZombieGardens.SettingChanged       += OnSeedSettingChanged;
+        ModifyZombieVineyards.SettingChanged     += OnSeedSettingChanged;
+        ModifyRefugeeGardens.SettingChanged      += OnSeedSettingChanged;
+        AddWasteToZombieGardens.SettingChanged   += OnSeedSettingChanged;
+        AddWasteToZombieVineyards.SettingChanged += OnSeedSettingChanged;
+        BoostPotentialSeedOutput.SettingChanged  += OnSeedSettingChanged;
     }
+
+    private static void OnSeedSettingChanged(object sender, EventArgs e) => Helpers.Reconcile();
 
     // Rewrites old "[0X. Name]" headers to the "[── N. Name ──]" form so existing
     // user values survive the section rename. Idempotent — once migrated there are
@@ -149,7 +162,16 @@ public class Plugin : BaseUnityPlugin
             new ConfigDescription("On: garden, vineyard and refugee planting crafts grow twice as fast while it's raining. Off: rain has no effect on garden growth speed.", null,
                 new ConfigurationManagerAttributes {Order = 99}));
 
-        // ── 7. Updates ──
+        // ── 7. Tracking ──
+        TrackPlantCycles = Config.Bind(TrackingSection, "Track Plant Cycles", true,
+            new ConfigDescription("On: every plant and harvest is recorded to BepInEx/plugins/TheSeedEqualizer/ledger.json — one entry per bed showing seeds in vs seeds returned, plus running totals per crop. Off: no tracking. Existing ledger file is preserved either way.", null,
+                new ConfigurationManagerAttributes {Order = 100}));
+
+        DebugTracking = Config.Bind(TrackingSection, "Verbose Tracking Logs", false,
+            new ConfigDescription("On: each spend, harvest, and cancel is also written as an info line to the BepInEx log. Off: only file-write errors are logged. Independent of the main Debug Logging toggle in Advanced.", null,
+                new ConfigurationManagerAttributes {Order = 99}));
+
+        // ── 8. Updates ──
         CheckForUpdates = Config.Bind(UpdatesSection, "Check for Updates", true,
             new ConfigDescription(
                 "Show a notice on the main menu when a newer version of this mod is available on NexusMods. Click the notice to open the mod's page.",
