@@ -70,7 +70,7 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<string> ManualSaveControllerButton { get; private set; }
     internal static ConfigEntry<bool> CheckForUpdates { get; private set; }
 
-    internal static ManualLogSource Log { get; private set; }
+    internal static TimestampedLogger Log { get; private set; }
 
     internal static Vector3 Pos { get; set; }
     internal static string DataPath { get; set; }
@@ -123,8 +123,8 @@ public class Plugin : BaseUnityPlugin
 
     private void Awake()
     {
-        Log = Logger;
-        LogHelper.Log = Logger;
+        Log = new TimestampedLogger(Logger);
+        LogHelper.Log = Log;
         MigrateRenamedSections();
         InitConfiguration();
         UpdateSaveData();
@@ -299,7 +299,7 @@ public class Plugin : BaseUnityPlugin
 
     internal static void SaveCallback(SaveSlotData slot)
     {
-        if (Plugin.DebugEnabled) WriteLog($"[SaveNow] SaveCallback fired: slot='{slot.filename_no_extension}'");
+        if (DebugEnabled) WriteLog($"[SaveNow] SaveCallback fired: slot='{slot.filename_no_extension}'");
         LastPlayedSlot.Value = slot.filename_no_extension;
         SaveLocation(false, slot.filename_no_extension);
         GUIElements.me.ShowSavingStatus(false);
@@ -307,7 +307,7 @@ public class Plugin : BaseUnityPlugin
 
     internal static void PerformNewDaySave()
     {
-        if (Plugin.DebugEnabled) WriteLog("[SaveNow] New day save starting");
+        if (DebugEnabled) WriteLog("[SaveNow] New day save starting");
         MainGame.me.StartCoroutine(PerformNewDaySaveIE());
     }
 
@@ -322,8 +322,6 @@ public class Plugin : BaseUnityPlugin
         if (IsInDungeon)
         {
             WriteLog("[SaveNow] New day save skipped: in dungeon");
-            Lang.Reload();
-            SpawnGerry(Lang.Get("CantSaveHere"));
             yield break;
         }
 
@@ -331,12 +329,12 @@ public class Plugin : BaseUnityPlugin
         {
             var date = DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
             var newSlot = $"newdaysave.{date}".Trim();
-            if (Plugin.DebugEnabled) WriteLog($"[SaveNow] New day saving to new slot '{newSlot}'");
+            if (DebugEnabled) WriteLog($"[SaveNow] New day saving to new slot '{newSlot}'");
             MainGame.me.save_slot.filename_no_extension = newSlot;
         }
         else
         {
-            if (Plugin.DebugEnabled) WriteLog($"[SaveNow] New day saving to existing slot '{MainGame.me.save_slot.filename_no_extension}'");
+            if (DebugEnabled) WriteLog($"[SaveNow] New day saving to existing slot '{MainGame.me.save_slot.filename_no_extension}'");
         }
 
         GUIElements.me.ShowSavingStatus(true);
@@ -373,12 +371,12 @@ public class Plugin : BaseUnityPlugin
         {
             var date = DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
             var newSlot = $"manualsave.{date}".Trim();
-            if (Plugin.DebugEnabled) WriteLog($"[SaveNow] Manual saving to new slot '{newSlot}'");
+            if (DebugEnabled) WriteLog($"[SaveNow] Manual saving to new slot '{newSlot}'");
             MainGame.me.save_slot.filename_no_extension = newSlot;
         }
         else
         {
-            if (Plugin.DebugEnabled) WriteLog($"[SaveNow] Manual saving to existing slot '{MainGame.me.save_slot.filename_no_extension}'");
+            if (DebugEnabled) WriteLog($"[SaveNow] Manual saving to existing slot '{MainGame.me.save_slot.filename_no_extension}'");
         }
 
         GUIElements.me.ShowSavingStatus(true);
@@ -581,7 +579,7 @@ public class Plugin : BaseUnityPlugin
         var homeVector = new Vector3(2841, -6396, -1332);
         var foundLocation = SaveLocationsDictionary.TryGetValue(slot, out var posVector3);
         var pos = foundLocation ? posVector3 : homeVector;
-        if (Plugin.DebugEnabled) WriteLog($"[SaveNow] RestoreLocation: slot='{slot}', found={foundLocation}, pos={pos}");
+        if (DebugEnabled) WriteLog($"[SaveNow] RestoreLocation: slot='{slot}', found={foundLocation}, pos={pos}");
         MainGame.me.player.PlaceAtPos(pos);
 
         StartTimer();
@@ -592,7 +590,7 @@ public class Plugin : BaseUnityPlugin
         Timers.RemoveAll(a => !a);
         foreach (var timer in Timers)
         {
-            if (Plugin.DebugEnabled) WriteLog($"Timer '{timer.name}' killed");
+            if (DebugEnabled) WriteLog($"Timer '{timer.name}' killed");
             timer.Stop();
             timer.DestroyComponent();
         }
@@ -610,20 +608,20 @@ public class Plugin : BaseUnityPlugin
         if (AutoSaveConfig.Value)
         {
             var intervalSeconds = SaveInterval.Value * 60;
-            if (Plugin.DebugEnabled) WriteLog($"[SaveNow] Starting auto-save timer: interval={SaveInterval.Value}min ({intervalSeconds}s)");
+            if (DebugEnabled) WriteLog($"[SaveNow] Starting auto-save timer: interval={SaveInterval.Value}min ({intervalSeconds}s)");
             var timer = GJTimer.AddTimer(intervalSeconds, AutoSave);
             timer.name = "AutoSaveTimer";
             Timers.Add(timer);
         }
         else
         {
-            if (Plugin.DebugEnabled) WriteLog("[SaveNow] Auto-save is disabled, no timer started");
+            if (DebugEnabled) WriteLog("[SaveNow] Auto-save is disabled, no timer started");
         }
     }
 
     private static void AutoSave()
     {
-        if (Plugin.DebugEnabled) WriteLog("[SaveNow] Auto-save timer fired");
+        if (DebugEnabled) WriteLog("[SaveNow] Auto-save timer fired");
         if (AutoSaveCoroutine != null)
         {
             MainGame.me.StopCoroutine(AutoSaveCoroutine);
@@ -653,11 +651,11 @@ public class Plugin : BaseUnityPlugin
         if (!NewFileOnAutoSave.Value)
         {
             var slot = MainGame.me.save_slot.filename_no_extension;
-            if (Plugin.DebugEnabled) WriteLog($"[SaveNow] Auto-saving to existing slot '{slot}'");
+            if (DebugEnabled) WriteLog($"[SaveNow] Auto-saving to existing slot '{slot}'");
             PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
                 delegate
                 {
-                    if (Plugin.DebugEnabled) WriteLog($"[SaveNow] Auto-save complete: '{slot}'");
+                    if (DebugEnabled) WriteLog($"[SaveNow] Auto-save complete: '{slot}'");
                     SaveLocation(false, slot);
                 });
         }
@@ -666,13 +664,13 @@ public class Plugin : BaseUnityPlugin
             GUIElements.me.ShowSavingStatus(true);
             var date = DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
             var newSlot = $"autosave.{date}".Trim();
-            if (Plugin.DebugEnabled) WriteLog($"[SaveNow] Auto-saving to new slot '{newSlot}'");
+            if (DebugEnabled) WriteLog($"[SaveNow] Auto-saving to new slot '{newSlot}'");
 
             MainGame.me.save_slot.filename_no_extension = newSlot;
             PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
                 delegate
                 {
-                    if (Plugin.DebugEnabled) WriteLog($"[SaveNow] Auto-save complete: '{newSlot}'");
+                    if (DebugEnabled) WriteLog($"[SaveNow] Auto-save complete: '{newSlot}'");
                     SaveLocation(false, newSlot);
                     GUIElements.me.ShowSavingStatus(false);
                 });
