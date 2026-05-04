@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.11 | 4 May 2026
+
+- New "Cascade Radius (tiles)" setting in the Harvest section. Default of 1 keeps the original 3x3 area. Bump it up if you want a single click to reap a 5x5, 7x7, or larger plot
+- Fixed an edge case where harvesting a bed near the world map's centre line could pull in a matching bed clear across the map
+
 ## 0.1.10 | 3 May 2026
 
 - Improved diagnostic logging for bug reports

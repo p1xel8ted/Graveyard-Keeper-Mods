@@ -18,6 +18,7 @@ public class Plugin : BaseUnityPlugin
     internal static bool DebugEnabled;
 
     internal static ConfigEntry<bool> RequireFarmerPerk { get; private set; }
+    internal static ConfigEntry<int> CascadeRadius { get; private set; }
     internal static ConfigEntry<bool> CheckForUpdates { get; private set; }
 
     internal static TimestampedLogger Log { get; private set; }
@@ -35,8 +36,13 @@ public class Plugin : BaseUnityPlugin
         Debug.SettingChanged += (_, _) => DebugEnabled = Debug.Value;
 
         RequireFarmerPerk = Config.Bind(HarvestSection, "Require Farmer Perk", true,
-            new ConfigDescription("On: nearby garden plots only mass-harvest after you've unlocked the Farmer perk in the tech tree. This matches the mod's original behaviour. Off: every harvest immediately reaps neighbouring plots of the same crop, even before the perk is unlocked — useful if you want the convenience from day one.", null,
+            new ConfigDescription("On: nearby garden plots only mass-harvest after you've unlocked the Farmer perk in the tech tree. This matches the mod's original behaviour. Off: every harvest immediately reaps neighbouring plots of the same crop, even before the perk is unlocked - useful if you want the convenience from day one.", null,
                 new ConfigurationManagerAttributes {Order = 100}));
+
+        CascadeRadius = Config.Bind(HarvestSection, "Cascade Radius (tiles)", 1,
+            new ConfigDescription("How far the harvest cascade reaches from the bed you clicked, measured in game tiles. 1 catches the 8 beds touching it (3x3 = 9 beds total). 2 catches a 5x5 (25 beds). Larger values pull in more neighbours but check more world objects per harvest, so leave this low unless you have very large plots.",
+                new AcceptableValueRange<int>(1, 5),
+                new ConfigurationManagerAttributes {Order = 90}));
 
         CheckForUpdates = Config.Bind(UpdatesSection, "Check for Updates", true,
             new ConfigDescription(
