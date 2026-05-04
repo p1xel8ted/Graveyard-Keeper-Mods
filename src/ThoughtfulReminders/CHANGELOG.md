@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.13 | 4 May 2026
+
+- Fixed day-change reminders only firing on the Astrologer's day (Sloth) and not on any other day, a regression introduced in 2.2.11 when the wake-up delay was added
+
 ## 2.2.12 | 3 May 2026
 
 - Polished Korean translations to read more naturally (thanks VeNiKu)

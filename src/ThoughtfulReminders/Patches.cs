@@ -26,12 +26,12 @@ public static class Patches
 
         if (!Application.isFocused) return;
 
-        if (PrevDayOfWeek != newDayOfWeek)
+        if (PrevDayOfWeek != newDayOfWeek && !PendingReminder)
         {
             QueuedAt = Time.unscaledTime;
             if (Plugin.DebugEnabled)
             {
-                Helpers.Log($"[Update] day changed {PrevDayOfWeek} → {newDayOfWeek} — queueing reminder (wake-up delay {Plugin.WakeUpDelay.Value:0.0}s).");
+                Helpers.Log($"[Update] day changed {PrevDayOfWeek} -> {newDayOfWeek} - queueing reminder (wake-up delay {Plugin.WakeUpDelay.Value:0.0}s).");
             }
             PendingReminder = true;
         }
@@ -40,17 +40,19 @@ public static class Patches
 
         if (MainGame.me.player.components.character.player_controlled_by_script)
         {
+            QueuedAt = Time.unscaledTime;
             if (Plugin.DebugEnabled)
             {
-                Helpers.Log($"[Update] reminder held back — player is scripted (cutscene/dialog). Will retry next frame.");
+                Helpers.Log($"[Update] reminder held back - player is scripted (cutscene/dialog). Will retry next frame.");
             }
             return;
         }
         if (EnvironmentEngine.me.IsTimeStopped())
         {
+            QueuedAt = Time.unscaledTime;
             if (Plugin.DebugEnabled)
             {
-                Helpers.Log($"[Update] reminder held back — time is stopped (paused/menu). Will retry next frame.");
+                Helpers.Log($"[Update] reminder held back - time is stopped (paused/menu). Will retry next frame.");
             }
             return;
         }
