@@ -1048,11 +1048,14 @@ _ul
 # Serena AI tool
 .serena/
 
-# Local dev-only aids — never tracked (scripts that read the Nexus API key from Environment.props, personal checklists, throwaway generators)
+# Local dev-only aids - never tracked (scripts that read the Nexus API key from Environment.props, personal checklists, throwaway generators)
 *.ps1
 *.bat
 *.py
 *.xlsx
+
+# Local-only dev mods (not in the .sln, not shipped)
+src/FlowScriptDumper/
 
 # NexusMods upload MSBuild target (when present)
 **/upload.target
