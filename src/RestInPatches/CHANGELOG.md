@@ -5,6 +5,7 @@
 - The +/- arrows are now also restored on items already sitting in your craft queue, not just the recipe list
 - Settings menu reorganised. Existing values preserved.
 - Reduced per-frame work for smoother performance
+- Quarry piles and cellar crates stop drifting off the map. New optional setting extends the fix to other dropped items.
 - Fixed refugees no longer spawning at the camp on saves where the tent counts had drifted (logged as "Wrong vacant places count in tent" / "No refugee for spawn"). The counts self-repair on load now
 - Improved diagnostic logging for bug reports
 

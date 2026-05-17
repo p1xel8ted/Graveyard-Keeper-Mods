@@ -4,6 +4,7 @@ namespace RestInPatches;
 public class Plugin : BaseUnityPlugin
 {
     private const string ApplicationSection = "── Application ──";
+    private const string DropsSection       = "── Drops ──";
     private const string FootprintsSection  = "── Footprints ──";
     private const string UpdatesSection     = "── Updates ──";
 
@@ -20,6 +21,7 @@ public class Plugin : BaseUnityPlugin
     private static ConfigEntry<bool> KeepRunningInBackground { get; set; }
     private static ConfigEntry<bool> MuteWhenUnfocused { get; set; }
     internal static ConfigEntry<int> MaxFootprints { get; private set; }
+    internal static ConfigEntry<bool> ApplyTriggerToAllDrops { get; private set; }
     internal static ConfigEntry<bool> CheckForUpdates { get; private set; }
 
     private void Awake()
@@ -99,6 +101,10 @@ public class Plugin : BaseUnityPlugin
         MaxFootprints = Config.Bind(FootprintsSection, "Max Footprints", 1000,
             new ConfigDescription("Maximum number of footprints kept in the world before the oldest are removed. 0 disables the cap.",
                 new AcceptableValueRange<int>(0, 10000)));
+
+        ApplyTriggerToAllDrops = Config.Bind(DropsSection, "Apply Trigger To All Drops", false,
+            "Stops stacked drops from physically separating each frame. By default this only applies to stones, marble, ore (quarry items) and crates (which pile up at the cellar elevator). Turn this on to extend the same fix to every other drop in the world - wood, dropped loot, the lot. Applies live: toggle either way and existing drops update immediately.");
+        ApplyTriggerToAllDrops.SettingChanged += (_, _) => Patches.DropColliderPatches.ReapplyAllExistingDrops();
 
         CheckForUpdates = Config.Bind(UpdatesSection, "Check for Updates", true,
             "Show a notice on the main menu when a newer version of this mod is available on NexusMods. Click the notice to open the mod's page.");
