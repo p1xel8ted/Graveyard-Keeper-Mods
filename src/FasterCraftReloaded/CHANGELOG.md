@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.13 | 17 May 2026
+## 1.4.13 | 19 May 2026
 
 - Fixed a launch crash on the 32-bit GOG build with certain mod combinations
 - This mod's craft-speed change now applies after Craft Speed Controller when both are installed, so its exclude list and multiplier have the final say (multipliers still stack)

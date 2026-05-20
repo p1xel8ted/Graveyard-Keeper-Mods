@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.1.17 | 17 May 2026
+## 2.1.17 | 19 May 2026
 
 - Fixed a launch crash on the 32-bit GOG build with certain mod combinations
 - Cellar crates no longer get swept over to your house by the loose-loot mover

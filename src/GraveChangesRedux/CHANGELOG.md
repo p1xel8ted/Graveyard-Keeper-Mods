@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.10 | 17 May 2026
+## 0.1.10 | 19 May 2026
 
 - Fixed a launch crash on the 32-bit GOG build with certain mod combinations
 - Mod settings menu (F1) labels now follow your in-game language

@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.2.17 | 17 May 2026
+## 1.2.17 | 19 May 2026
 
 - Fixed a launch crash on the 32-bit GOG build with certain mod combinations
 - Resource multipliers now apply after Even More Resources when both are installed, so this mod's settings have the final say (multipliers compound)
