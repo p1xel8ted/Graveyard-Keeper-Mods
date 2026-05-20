@@ -1,12 +1,12 @@
 {
-  "cfg.section.general": "일반",
+  "cfg.section.general": "일반 설정",
   "cfg.section.updates": "업데이트",
   "cfg.remove_fog.name": "안개 제거",
-  "cfg.remove_fog.desc": "야외 및 실내 날씨에서 안개를 제거합니다.",
+  "cfg.remove_fog.desc": "실내외 날씨에 나타나는 안개를 없앱니다.",
   "cfg.remove_wind.name": "바람 제거",
-  "cfg.remove_wind.desc": "바람 날씨 효과를 제거합니다.",
+  "cfg.remove_wind.desc": "바람 날씨 효과를 없앱니다.",
   "cfg.remove_rain.name": "비 제거",
-  "cfg.remove_rain.desc": "비 날씨 효과를 제거합니다.",
+  "cfg.remove_rain.desc": "비 날씨 효과를 없앱니다.",
   "cfg.check_for_updates.name": "업데이트 확인",
-  "cfg.check_for_updates.desc": "NexusMods에 새 버전이 올라오면 메인 메뉴에 알림이 표시됩니다. 알림을 클릭하면 모드 페이지로 이동합니다."
+  "cfg.check_for_updates.desc": "넥서스모드에 이 모드의 최신 버전이 나오면 메인 메뉴에 알림을 띄웁니다. 알림을 누르면 모드 페이지가 열립니다."
 }

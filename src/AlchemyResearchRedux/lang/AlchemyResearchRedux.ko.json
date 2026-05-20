@@ -1,8 +1,8 @@
 {
-  "cfg.section.advanced": "고급",
+  "cfg.section.advanced": "고급 설정",
   "cfg.section.updates": "업데이트",
-  "cfg.debug_logging.name": "디버그 로깅",
-  "cfg.debug_logging.desc": "연금술 레시피 관련 자세한 진단 정보를 BepInEx 콘솔에 기록합니다. 일반 플레이 시에는 꺼두세요.",
+  "cfg.debug_logging.name": "디버그 기록 남기기",
+  "cfg.debug_logging.desc": "연금술 레시피에 대한 상세한 진단 정보를 BepInEx 콘솔에 기록합니다. 평소 게임 플레이 시에는 끄고 사용하세요.",
   "cfg.check_for_updates.name": "업데이트 확인",
-  "cfg.check_for_updates.desc": "NexusMods에 새 버전이 올라오면 메인 메뉴에 알림이 표시됩니다. 알림을 클릭하면 모드 페이지로 이동합니다."
+  "cfg.check_for_updates.desc": "넥서스모드에 이 모드의 최신 버전이 나오면 메인 메뉴에 알림을 띄웁니다. 알림을 누르면 모드 페이지가 열립니다."
 }

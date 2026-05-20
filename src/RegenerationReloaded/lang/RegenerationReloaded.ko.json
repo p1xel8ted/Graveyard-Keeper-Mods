@@ -1,14 +1,14 @@
 {
   "cfg.section.regeneration": "회복",
   "cfg.section.updates": "업데이트",
-  "cfg.show_regeneration_updates.name": "회복 알림 표시",
-  "cfg.show_regeneration_updates.desc": "체력과 에너지가 회복될 때 알림을 표시합니다.",
+  "cfg.show_regeneration_updates.name": "회복 상태 표시",
+  "cfg.show_regeneration_updates.desc": "체력과 에너지가 회복될 때 업데이트 내용을 표시합니다.",
   "cfg.life_regeneration_rate.name": "체력 회복 속도",
-  "cfg.life_regeneration_rate.desc": "틱당 회복되는 체력량을 설정합니다. 0이면 비활성화됩니다.",
+  "cfg.life_regeneration_rate.desc": "틱당 체력이 회복되는 속도를 설정합니다. 0으로 설정하면 비활성화됩니다.",
   "cfg.energy_regeneration_rate.name": "에너지 회복 속도",
-  "cfg.energy_regeneration_rate.desc": "틱당 회복되는 에너지량을 설정합니다. 0이면 비활성화됩니다.",
-  "cfg.regeneration_delay.name": "회복 간격",
-  "cfg.regeneration_delay.desc": "각 회복 틱 사이의 간격을 초 단위로 설정합니다.",
+  "cfg.energy_regeneration_rate.desc": "틱당 에너지가 회복되는 속도를 설정합니다. 0으로 설정하면 비활성화됩니다.",
+  "cfg.regeneration_delay.name": "회복 지연 시간",
+  "cfg.regeneration_delay.desc": "각 회복 틱 사이의 지연 시간을 초 단위로 설정합니다.",
   "cfg.check_for_updates.name": "업데이트 확인",
-  "cfg.check_for_updates.desc": "NexusMods에 새 버전이 올라오면 메인 메뉴에 알림이 표시됩니다. 알림을 클릭하면 모드 페이지로 이동합니다."
+  "cfg.check_for_updates.desc": "넥서스모드에 이 모드의 최신 버전이 나오면 메인 메뉴에 알림을 띄웁니다. 알림을 누르면 모드 페이지가 열립니다."
 }

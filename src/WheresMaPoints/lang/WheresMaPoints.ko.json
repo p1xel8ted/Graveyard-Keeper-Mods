@@ -1,14 +1,14 @@
 {
   "cfg.section.user_interface": "사용자 인터페이스",
-  "cfg.section.visual_feedback": "시각 피드백",
-  "cfg.section.audio_feedback": "오디오 피드백",
+  "cfg.section.visual_feedback": "시각적 피드백",
+  "cfg.section.audio_feedback": "청각적 피드백",
   "cfg.section.updates": "업데이트",
   "cfg.always_show_xp_bar.name": "경험치 바 항상 표시",
-  "cfg.always_show_xp_bar.desc": "경험치 획득이 없어도 경험치 바를 항상 표시합니다.",
-  "cfg.show_point_gain_above_keeper.name": "키퍼 머리 위에 획득 점수 표시",
-  "cfg.show_point_gain_above_keeper.desc": "획득한 점수를 키퍼 머리 위에 표시합니다.",
-  "cfg.still_play_collect_audio.name": "획득 효과음 계속 재생",
-  "cfg.still_play_collect_audio.desc": "획득 점수가 키퍼 머리 위에 표시될 때도 획득 효과음을 계속 재생합니다.",
+  "cfg.always_show_xp_bar.desc": "경험치를 얻는 중이 아니더라도 경험치 바를 항상 표시합니다.",
+  "cfg.show_point_gain_above_keeper.name": "관리자 머리 위에 포인트 획득 표시",
+  "cfg.show_point_gain_above_keeper.desc": "획득한 포인트를 관리자 머리 위에 표시합니다.",
+  "cfg.still_play_collect_audio.name": "수집 효과음 계속 재생",
+  "cfg.still_play_collect_audio.desc": "포인트 획득이 관리자 머리 위에 표시될 때 수집 효과음을 계속 재생합니다.",
   "cfg.check_for_updates.name": "업데이트 확인",
-  "cfg.check_for_updates.desc": "NexusMods에 새 버전이 올라오면 메인 메뉴에 알림이 표시됩니다. 알림을 클릭하면 모드 페이지로 이동합니다."
+  "cfg.check_for_updates.desc": "넥서스모드에 이 모드의 최신 버전이 나오면 메인 메뉴에 알림을 띄웁니다. 알림을 누르면 모드 페이지가 열립니다."
 }

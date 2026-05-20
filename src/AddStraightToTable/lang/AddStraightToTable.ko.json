@@ -1,5 +1,5 @@
 {
   "cfg.section.updates": "업데이트",
   "cfg.check_for_updates.name": "업데이트 확인",
-  "cfg.check_for_updates.desc": "NexusMods에 새 버전이 올라오면 메인 메뉴에 알림이 표시됩니다. 알림을 클릭하면 모드 페이지로 이동합니다."
+  "cfg.check_for_updates.desc": "넥서스모드에 이 모드의 최신 버전이 나오면 메인 메뉴에 알림을 띄웁니다. 알림을 누르면 모드 페이지가 열립니다."
 }

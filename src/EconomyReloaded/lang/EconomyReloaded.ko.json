@@ -1,14 +1,14 @@
 {
   "cfg.section.economy": "경제",
   "cfg.section.updates": "업데이트",
-  "cfg.dynamic_buy_pricing.name": "동적 구매가",
-  "cfg.dynamic_buy_pricing.desc": "켜면 상점 재고가 적어질수록 구매가가 오릅니다. 끄면 항상 기본가입니다.",
-  "cfg.buy_price_multiplier.name": "구매가 배수",
-  "cfg.buy_price_multiplier.desc": "최종 배수. 1.0 = 기본, 0.5 = 절반, 2.0 = 두 배.",
-  "cfg.dynamic_sell_pricing.name": "동적 판매가",
-  "cfg.dynamic_sell_pricing.desc": "켜면 상점 재고가 늘수록 판매가가 떨어집니다. 끄면 항상 기본가입니다.",
-  "cfg.sell_price_multiplier.name": "판매가 배수",
-  "cfg.sell_price_multiplier.desc": "최종 배수. 0.75는 바닐라와 같습니다.",
+  "cfg.dynamic_buy_pricing.name": "실시간 가격 변동 (상점 구매)",
+  "cfg.dynamic_buy_pricing.desc": "켜짐: 상점에 물건이 부족할수록 가격이 비싸집니다. 꺼짐: 항상 정해진 기본 가격으로 살 수 있습니다.",
+  "cfg.buy_price_multiplier.name": "구매 가격 배율",
+  "cfg.buy_price_multiplier.desc": "구매 가격에 적용되는 최종 비율입니다. 1.0 = 기본 가격, 0.5 = 절반 가격, 2.0 = 두 배 가격입니다.",
+  "cfg.dynamic_sell_pricing.name": "실시간 가격 변동 (상점 판매)",
+  "cfg.dynamic_sell_pricing.desc": "켜짐: 상점에 물건이 많아질수록 물건을 팔 때 받는 돈이 줄어듭니다. 꺼짐: 언제나 똑같은 가격으로 팔 수 있습니다.",
+  "cfg.sell_price_multiplier.name": "판매 가격 배율",
+  "cfg.sell_price_multiplier.desc": "판매 가격에 적용되는 최종 비율입니다. 0.75는 게임 기본값과 같습니다.",
   "cfg.check_for_updates.name": "업데이트 확인",
-  "cfg.check_for_updates.desc": "NexusMods에 새 버전이 올라오면 메인 메뉴에 알림이 표시됩니다. 알림을 클릭하면 모드 페이지로 이동합니다."
+  "cfg.check_for_updates.desc": "넥서스모드에 이 모드의 최신 버전이 나오면 메인 메뉴에 알림을 띄웁니다. 알림을 누르면 모드 페이지가 열립니다."
 }

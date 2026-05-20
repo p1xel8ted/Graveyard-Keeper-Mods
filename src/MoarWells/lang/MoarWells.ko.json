@@ -1,10 +1,10 @@
 {
-  "Name": "돌 우물",
+  "Name": "석재 우물",
   "PumpName": "펌프 우물",
-  "cfg.section.unlocks": "해금",
+  "cfg.section.unlocks": "잠금 해제",
   "cfg.section.updates": "업데이트",
-  "cfg.require_engineer_for_pump_well.name": "펌프 우물에 엔지니어 기술 요구",
-  "cfg.require_engineer_for_pump_well.desc": "펌프 우물 건설 전에 바닐라의 엔지니어 기술 요구 조건을 유지합니다. 끄면 기본 우물과 함께 처음부터 펌프 우물을 사용할 수 있습니다.",
+  "cfg.require_engineer_for_pump_well.name": "펌프 우물에 엔지니어 특성 요구",
+  "cfg.require_engineer_for_pump_well.desc": "펌프 우물을 건설하기 전에 바닐라의 '엔지니어' 특성을 요구합니다. 이 옵션을 끄면 석재 우물과 함께 처음부터 펌프 우물을 잠금 해제할 수 있습니다.",
   "cfg.check_for_updates.name": "업데이트 확인",
-  "cfg.check_for_updates.desc": "NexusMods에 새 버전이 올라오면 메인 메뉴에 알림이 표시됩니다. 알림을 클릭하면 모드 페이지로 이동합니다."
+  "cfg.check_for_updates.desc": "넥서스모드에 이 모드의 최신 버전이 나오면 메인 메뉴에 알림을 띄웁니다. 알림을 누르면 모드 페이지가 열립니다."
 }
