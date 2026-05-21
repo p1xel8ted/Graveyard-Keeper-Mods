@@ -470,14 +470,15 @@ public static class Helpers
     // Outdoor drop spot next to the Keeper's house, captured in-game via the tag-scan tool.
     private static readonly Vector3 NearHouseDropSpot = new(4601.0f, 290.6f, 0.0f);
 
-    // Skip quest items, undroppable items, and anything with a run_script_after_drop that
-    // needs to fire at the original spot.
+    // Skip quest items, undroppable items, anything with a run_script_after_drop that
+    // needs to fire at the original spot, and dead bodies.
     private static bool IsProtectedDrop(DropResGameObject drop)
     {
         var def = drop?.res?.definition;
         if (def == null) return false;
         if (def.player_cant_throw_out) return true;
         if (!string.IsNullOrEmpty(def.run_script_after_drop)) return true;
+        if (def.type == ItemDefinition.ItemType.Body) return true;
         return false;
     }
 

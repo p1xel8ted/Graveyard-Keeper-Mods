@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.18 | 21 May 2026
+
+- Dead bodies are no longer swept to your dump site on save load
+
 ## 2.1.17 | 19 May 2026
 
 - Fixed a launch crash on the 32-bit GOG build with certain mod combinations
