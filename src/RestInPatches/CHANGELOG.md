@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4 | 25 May 2026
+
+- Fixed workers and other NPCs freezing after the game has been left running in the background
+
 ## 0.1.3 | 23 May 2026
 
 - Removed the dropped-item walk-through setting; it now lives in the Get Outta Ma Way mod
