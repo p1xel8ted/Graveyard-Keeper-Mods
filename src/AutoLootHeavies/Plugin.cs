@@ -294,7 +294,7 @@ public class Plugin : BaseUnityPlugin
         var sw = new Stopwatch();
         sw.Start();
 
-        var snapshot = WorldMap._objs;
+        var snapshot = new List<WorldGameObject>(WorldMap._objs);
         var count = snapshot.Count;
         var fresh = new List<Stockpile>(SortedStockpiles.Count);
         var chunkSize = CachedScanChunkSize;
