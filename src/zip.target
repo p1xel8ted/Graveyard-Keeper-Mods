@@ -13,9 +13,10 @@
         <ItemGroup>
             <!-- *.vortex_backup / *.vortex_new are leftovers Vortex writes into the plugin dir when it deploys
                  or rolls back a previous version. They live alongside the real files (including inside lang/)
-                 and would otherwise get scooped up by the glob below. -->
+                 and would otherwise get scooped up by the glob below.
+                 Locations\ holds Beam Me Up Gerry's runtime user-created custom zones, not shipped content. -->
             <OutputFiles Include="$(OutputPath)\**\*.*"
-                         Exclude="$(OutputPath)\**\*.zip;$(OutputPath)\**\*.pdb;$(OutputPath)\**\*.deps.json;$(OutputPath)\**\*.csv;$(OutputPath)\**\*.vortex_backup;$(OutputPath)\**\*.vortex_new;$(OutputPath)\SaveBackup\**\*.*;$(OutputPath)\_dump\**\*.*" />
+                         Exclude="$(OutputPath)\**\*.zip;$(OutputPath)\**\*.pdb;$(OutputPath)\**\*.deps.json;$(OutputPath)\**\*.csv;$(OutputPath)\**\*.vortex_backup;$(OutputPath)\**\*.vortex_new;$(OutputPath)\SaveBackup\**\*.*;$(OutputPath)\_dump\**\*.*;$(OutputPath)\Locations\**\*.*" />
         </ItemGroup>
 
         <Copy SourceFiles="@(OutputFiles)"
