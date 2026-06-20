@@ -163,7 +163,7 @@ public static class Patches
         var worldZoneId = __instance.GetMyWorldZoneId();
         var isQuarry = worldZoneId.Contains("stone_workyard") || worldZoneId.Contains("marble_deposit");
         var isWell = objId.Contains("well");
-        var isZombieMill = worldZoneId.Contains("zombie_mill");
+        var isZombieMill = worldZoneId.Contains("zombie_sawmill");
         var isBuilder = __instance.obj_def.interaction_type == ObjectDefinition.InteractionType.Builder;
 
         var objOrDefMatchesSkip = Fields.AlwaysSkipInventories.Any(s => objId.Contains(s) || objDefId.Contains(s));
@@ -383,7 +383,7 @@ public static class Patches
 
         var isQuarry = crafteryWzId.Contains("stone_workyard") || crafteryWzId.Contains("marble_deposit");
         var isWell = crafteryObjId.Contains("well") || crafteryObjDefId.Contains("well");
-        var isZombieMill = crafteryWzId.Contains("zombie_mill");
+        var isZombieMill = crafteryWzId.Contains("zombie_sawmill");
 
         var isZombie = crafteryObjId.Contains("zombie") || crafteryObjDefId.Contains("zombie");
         Fields.ZombieWorker = isZombie;

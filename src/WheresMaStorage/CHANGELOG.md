@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.0 | 20 June 2026
+
+- The "Exclude Zombie Mill" inventory option now actually keeps that area out of shared storage
+
 ## 2.1.18 | 23 May 2026
 
 - Dead bodies are no longer swept to your dump site on save load
