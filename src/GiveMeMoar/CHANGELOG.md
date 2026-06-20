@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.19 | 20 June 2026
+
+- Preparing corpses no longer multiplies body parts with the Craft Output Multiplier
+
 ## 1.2.18 | 6 June 2026
 
 - Fixed wine and other quality crafts piling up into the thousands no matter your Craft Output Multiplier

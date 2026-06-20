@@ -248,6 +248,15 @@ public static class Patches
             return;
         }
 
+        if (IsBodyModificationCraft(craft.id))
+        {
+            if (Plugin.DebugEnabled)
+            {
+                Helpers.Log($"[CraftMQ] '{craft.id}' skipped: body modification craft");
+            }
+            return;
+        }
+
         var excludeTools = Plugin.CraftExcludeToolsAndEquipment.Value;
         _mqValueSnapshot = new List<int>(craft.output.Count);
         _mqCraft = craft;
@@ -340,6 +349,15 @@ public static class Patches
             return;
         }
 
+        if (IsBodyModificationCraft(craft.id))
+        {
+            if (Plugin.DebugEnabled)
+            {
+                Helpers.Log($"[CraftDrop] '{craft.id}' skipped: body modification craft");
+            }
+            return;
+        }
+
         var excludeTools = Plugin.CraftExcludeToolsAndEquipment.Value;
         var mutated = 0;
         var skippedTools = 0;
@@ -378,6 +396,14 @@ public static class Patches
         }
         return false;
     }
+
+    // Corpse prep at the autopsy table. Extraction crafts ("ex:") run their output through
+    // ResModificator, so the craft multiplier would scale the body parts you pull out and flood
+    // the inventory. Insertion crafts ("insert:") add directly and never multiply, but match the
+    // same intent. The Multiply Body Parts and Sin Shard multipliers cover body prep separately.
+    private static bool IsBodyModificationCraft(string craftId)
+        => craftId.StartsWith("ex:", StringComparison.Ordinal)
+           || craftId.StartsWith("insert:", StringComparison.Ordinal);
 
     private static bool IsToolLikeOutput(string outputId)
     {
