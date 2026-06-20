@@ -245,14 +245,14 @@ public static class Invents
         var requesterInQuarry = zone.Contains("stone_workyard") || zone.Contains("marble_deposit");
         var requesterInZombieMill = zone.Contains("zombie_sawmill");
 
-        if (requester.Contains("refugee_builddesk") || requester.Contains("storage_builddesk") || requesterInQuarry)
+        // Rebuild the pool whenever it's gone stale, no matter which station is asking.
+        // Sleeping, building, or destroying a chest marks it stale but leaves the old data
+        // behind, and desks like the apiary and cellar never used to trigger a rebuild.
+        if (!Fields.InventoriesLoaded && Fields.LoadInventoriesCoroutine == null)
         {
-            if (!Fields.InventoriesLoaded && Fields.LoadInventoriesCoroutine == null)
-            {
-                if (Plugin.DebugEnabled) Helpers.Log($"[GetMiInventory] triggering reload (requester={requester} zone={zone})");
-                Fields.LoadInventoriesCoroutine = MainGame.me.StartCoroutine(LoadInventories());
-                MainGame.me.StartCoroutine(LoadWildernessInventories());
-            }
+            if (Plugin.DebugEnabled) Helpers.Log($"[GetMiInventory] pool stale -> reloading (requester={requester} zone={zone})");
+            Fields.LoadInventoriesCoroutine = MainGame.me.StartCoroutine(LoadInventories());
+            MainGame.me.StartCoroutine(LoadWildernessInventories());
         }
 
         var wildAdded = 0;
@@ -378,12 +378,6 @@ public static class Invents
         {
             if (Plugin.DebugEnabled) Helpers.Log($"[GetMi] skip (zombie, shared disallowed) obj={objId} linkedWorker={linkedWorkerObjId}");
             return orig;
-        }
-
-        if (objId.Contains("storage_builddesk") && !Fields.InventoriesLoaded && Fields.LoadInventoriesCoroutine == null)
-        {
-            if (Plugin.DebugEnabled) Helpers.Log($"[GetMi] storage_builddesk interaction → triggering LoadInventories");
-            Fields.LoadInventoriesCoroutine = MainGame.me.StartCoroutine(LoadInventories());
         }
 
         var isSpecialObject = isZombie || objId.StartsWith("mf_") || Fields.GratitudeCraft;
