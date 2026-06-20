@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.2.19 | 20 June 2026
+## 1.3.0 | 20 June 2026
 
 - Preparing corpses no longer multiplies body parts with the Craft Output Multiplier
 
