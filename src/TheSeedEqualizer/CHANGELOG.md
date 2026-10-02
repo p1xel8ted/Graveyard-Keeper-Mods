@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.3.14 | 2 October 2026
+## 1.4.0 | 2 October 2026
 
 - Modify Player Gardens is now on by default for new installs
 
