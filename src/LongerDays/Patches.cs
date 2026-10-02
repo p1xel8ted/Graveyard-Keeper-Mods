@@ -97,6 +97,46 @@ public static class Patches
         WarnIfNoMatch(replaced, $"{nameof(PlayerBuff)}.{nameof(PlayerBuff.GetTimerText)}", "ldc.r4 450");
     }
 
+    private static HashSet<string> _despawnCrafts;
+
+    // The crafts that spawners give their mobs to remove them again later.
+    // Not kept until the game's balance data has loaded.
+    private static bool IsDespawnCraft(string craftId)
+    {
+        if (_despawnCrafts == null)
+        {
+            var spawners = GameBalance.me?.spawners_data;
+            if (spawners == null || spawners.Count == 0) return false;
+
+            var ids = new HashSet<string>();
+            foreach (var spawner in spawners)
+            {
+                if (spawner?.mobs == null) continue;
+                foreach (var mob in spawner.mobs)
+                {
+                    if (!string.IsNullOrEmpty(mob?.craft_name))
+                    {
+                        ids.Add(mob.craft_name);
+                    }
+                }
+            }
+            _despawnCrafts = ids;
+        }
+
+        return _despawnCrafts.Contains(craftId);
+    }
+
+    // The swamp slimes and bats appear on the game clock but leave on a real-seconds timer,
+    // so on a longer day they were gone early. Slow that timer to match the day.
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.ReallyUpdateComponent))]
+    public static void CraftComponent_ReallyUpdateComponent(CraftComponent __instance, ref float delta_time)
+    {
+        if (!__instance.is_crafting || __instance.current_craft == null) return;
+        if (!IsDespawnCraft(__instance.current_craft.id)) return;
+        delta_time /= GetTimeMulti();
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.FromTimeKToSeconds))]
     public static void TimeOfDay_FromTimeKToSeconds(float time_in_time_k, ref float __result)
