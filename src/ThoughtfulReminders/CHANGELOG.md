@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.1 | 2 October 2026
+
+- Harvest reminders for beds that ripen a few moments apart are now grouped into one
+
 ## 2.3.0 | 13 September 2026
 
 - Reminders now wait until morning instead of turning up in the middle of the night

@@ -8,6 +8,10 @@ public static class Patches
     private static bool PendingHarvestReminder { get; set; }
     private static int HarvestTargetDay { get; set; }
     private static float QueuedAt { get; set; }
+    private static float LastReadyAt { get; set; }
+
+    // How long the garden has to stay quiet before the harvest reminder is said.
+    private const float HarvestSettleSeconds = 3f;
 
     private const string ConfessionEvent = "confession_available";
     private const string BoothPrefix = "church_budka_";
@@ -19,15 +23,28 @@ public static class Patches
         "garden_pumpkin_ready", "garden_wheat_ready"
     ];
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.ReplaceWithObject))]
+    public static void WorldGameObject_ReplaceWithObject_Prefix(WorldGameObject __instance, out string __state)
+    {
+        __state = __instance.obj_id;
+    }
+
     // Beds turn into their "_ready" object the moment they finish growing, so this is where a
     // harvest reminder starts. One flag for the lot, so a whole plot ripening gives one message.
     [HarmonyPostfix]
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.ReplaceWithObject))]
-    public static void WorldGameObject_ReplaceWithObject(string new_obj_id)
+    public static void WorldGameObject_ReplaceWithObject(WorldGameObject __instance, string new_obj_id, string __state)
     {
         if (!MainGame.game_started) return;
         if (!Plugin.HarvestReminders.Value) return;
         if (!ReadyCrops.Contains(new_obj_id)) return;
+
+        // Only a bed that really just turned ready counts.
+        if (__state == new_obj_id) return;
+        if (__instance.obj_id != new_obj_id) return;
+
+        LastReadyAt = Time.unscaledTime;
 
         if (PendingHarvestReminder) return;
 
@@ -52,6 +69,7 @@ public static class Patches
         PendingHarvestReminder = false;
         HarvestTargetDay = 0;
         QueuedAt = 0f;
+        LastReadyAt = 0f;
 
         if (Plugin.DebugEnabled)
         {
@@ -211,6 +229,13 @@ public static class Patches
             {
                 Helpers.Log($"[Update] harvest reminder held back - waiting for the morning of day {HarvestTargetDay} (today is {MainGame.me.save.day}).");
             }
+            return;
+        }
+
+        // Beds planted together ripen moments apart. Wait for the last one.
+        if (Plugin.HarvestTiming.Value == HarvestReminderTiming.WhenReady
+            && Time.unscaledTime - LastReadyAt < HarvestSettleSeconds)
+        {
             return;
         }
 
