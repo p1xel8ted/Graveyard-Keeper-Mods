@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.7 | 2 October 2026
+
+- Fixed D-pad presses counting twice at high frame rates
+
 ## 0.1.6 | 13 September 2026
 
 - Fixed the Max Footprints setting having no effect
