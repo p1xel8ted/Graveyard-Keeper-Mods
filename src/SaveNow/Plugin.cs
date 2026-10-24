@@ -181,6 +181,12 @@ public class Plugin : BaseUnityPlugin
 
     private static IEnumerator PerformNewDaySaveIE()
     {
+        if (!MainGame.game_started)
+        {
+            WriteLog("[SaveNow] New day save skipped: no game running");
+            yield break;
+        }
+
         if (!CanSave)
         {
             WriteLog("[SaveNow] New day save skipped: player controlled by script");
@@ -501,6 +507,11 @@ public class Plugin : BaseUnityPlugin
 
     private static IEnumerator AutoSaveIE()
     {
+        if (!MainGame.game_started)
+        {
+            WriteLog("[SaveNow] Auto-save skipped: no game running");
+            yield break;
+        }
         if (EnvironmentEngine.me.IsTimeStopped())
         {
             WriteLog("[SaveNow] Auto-save skipped: time is stopped");

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.0 | 24 October 2026
+
+- Fixed auto-save carrying on at the main menu after leaving a game, which could overwrite your save with every item on the ground missing
+
 ## 2.5.14 | 19 May 2026
 
 - Fixed a launch crash on the 32-bit GOG build with certain mod combinations

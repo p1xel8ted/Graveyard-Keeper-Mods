@@ -22,6 +22,16 @@ public static class Patches
         }
     }
 
+    // Leaving to the main menu keeps the old save loaded but clears every item on the ground,
+    // so the auto-save timer has to stop here or it saves an empty world over the slot.
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(SaveSlotsMenuGUI), nameof(SaveSlotsMenuGUI.StopPlayingGame))]
+    public static void SaveSlotsMenuGUI_StopPlayingGame()
+    {
+        if (Plugin.DebugEnabled) Plugin.WriteLog("[SaveNow] Leaving game - stopping auto-save timer");
+        Plugin.KillTimers();
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SaveSlotsMenuGUI), nameof(SaveSlotsMenuGUI.RedrawSlots))]
     public static void SaveSlotsMenuGUI_RedrawSlots(ref List<SaveSlotData> slot_datas, ref bool focus_on_first)
