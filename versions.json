@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-02T16:30:14Z",
-  "generated_by": "update-manifest.yml@2180807c",
+  "generated_at": "2026-10-25T04:29:18Z",
+  "generated_by": "update-manifest.yml@50f02223",
   "game_domain": "graveyardkeeper",
   "mods": [
     {
@@ -318,10 +318,10 @@
       "plugin_guid": "p1xel8ted.gyk.savenow",
       "nexus_mod_id": 41,
       "nexus_url": "https://www.nexusmods.com/graveyardkeeper/mods/41",
-      "latest_version": "2.5.14",
-      "latest_file_id": 1190,
+      "latest_version": "2.6.0",
+      "latest_file_id": 1368,
       "latest_file_name": "Save Now",
-      "uploaded_unix": 1779190868,
+      "uploaded_unix": 1792893379,
       "status": "ok"
     },
     {
