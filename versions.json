@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-25T04:29:18Z",
-  "generated_by": "update-manifest.yml@50f02223",
+  "generated_at": "2026-10-30T16:22:13Z",
+  "generated_by": "update-manifest.yml@090fc93b",
   "game_domain": "graveyardkeeper",
   "mods": [
     {
@@ -328,10 +328,10 @@
       "plugin_guid": "p1xel8ted.gyk.showmemoar",
       "nexus_mod_id": 81,
       "nexus_url": "https://www.nexusmods.com/graveyardkeeper/mods/81",
-      "latest_version": "0.1.13",
-      "latest_file_id": 1191,
+      "latest_version": "0.2.0",
+      "latest_file_id": 1375,
       "latest_file_name": "Show Me Moar",
-      "uploaded_unix": 1779190882,
+      "uploaded_unix": 1793339756,
       "status": "ok"
     },
     {
@@ -378,10 +378,10 @@
       "plugin_guid": "p1xel8ted.gyk.wheresmastorage",
       "nexus_mod_id": 62,
       "nexus_url": "https://www.nexusmods.com/graveyardkeeper/mods/62",
-      "latest_version": "2.2.2",
-      "latest_file_id": 1318,
+      "latest_version": "2.2.3",
+      "latest_file_id": 1376,
       "latest_file_name": "Where's Ma Storage",
-      "uploaded_unix": 1790928393,
+      "uploaded_unix": 1793339856,
       "status": "ok"
     },
     {
