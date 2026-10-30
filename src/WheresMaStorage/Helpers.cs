@@ -77,7 +77,7 @@ public static class Helpers
         // 999 here is not the cap. It keeps the game's own huge counters (faith, science) out.
         foreach (var id in GameBalance.me.items_data.Where(id => id.stack_count is > 1 and <= 999))
         {
-            if (id.is_tool || id.IsWeapon() || id.IsEquipment() || id.type == ItemDefinition.ItemType.Preach || Fields.PenPaperInkItems.Contains(id.id) || Fields.ChiselItems.Contains(id.id) || Fields.GraveItems.Contains(id.type) || Fields.SinShardItems.Contains(id.id)) continue;
+            if (id.is_tool || id.IsWeapon() || id.IsEquipment() || id.type == ItemDefinition.ItemType.Preach || Fields.PenPaperInkItems.Contains(id.id) || Fields.ChiselItems.Contains(id.id) || Fields.GraveItems.Contains(id.type)) continue;
             if (!OriginalStackSizes.TryGetValue(id.id, out var originalSize)) continue;
 
             var newSize = NewStackSize(originalSize);

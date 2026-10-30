@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.3 | 30 October 2026
+
+- Sin shards now use your stack size setting like other items
+
 ## 2.2.2 | 2 October 2026
 
 - Items taken back out of a trade offer now reappear in your inventory when Hide Invalid Selections is on
