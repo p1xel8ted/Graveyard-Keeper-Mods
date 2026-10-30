@@ -22,11 +22,6 @@ public static class ScreenResolutionsPatch
     [HarmonyPatch(typeof(ResolutionConfig), nameof(ResolutionConfig.InitResolutions))]
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
     {
-        if (!Plugin.Ultrawide.Value)
-        {
-            Plugin.Log.LogWarning("Ultra-wide resolutions are disabled!");
-            return instructions.AsEnumerable();
-        }
         var originalInstructions = instructions.ToList();
         var getResolutionsMethod = AccessTools.Property(typeof(Screen), nameof(Screen.resolutions))?.GetGetMethod();
         var myResolutionsMethod = AccessTools.Method(typeof(ScreenResolutionsPatch), nameof(MyResolutions));
@@ -36,7 +31,7 @@ public static class ScreenResolutionsPatch
             t.operand = myResolutionsMethod;
         }
 
-        Plugin.Log.LogInfo("Ultra-wide resolutions are enabled!.");
+        Plugin.Log.LogInfo("Native resolution added to the resolution list.");
         return originalInstructions.AsEnumerable();
     }
 }

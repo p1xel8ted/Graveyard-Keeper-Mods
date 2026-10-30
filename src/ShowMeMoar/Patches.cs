@@ -97,7 +97,6 @@ public static class Patches
     [HarmonyPatch(typeof(ResolutionConfig), nameof(ResolutionConfig.GetResolutionConfigOrNull))]
     public static void ResolutionConfig_GetResolutionConfigOrNull(int width, int height, ref ResolutionConfig __result)
     {
-        if (!Plugin.Ultrawide.Value) return;
         var res = new ResolutionConfig(width, height);
         if (height < 900 || width < 1280)
         {

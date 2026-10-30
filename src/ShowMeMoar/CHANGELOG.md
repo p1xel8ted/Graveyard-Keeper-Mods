@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0 | 30 October 2026
+
+- Your monitor's native resolution now shows in the list on 16:10 and 4K screens, not just ultrawide ones
+
 ## 0.1.13 | 19 May 2026
 
 - Fixed a launch crash on the 32-bit GOG build with certain mod combinations
